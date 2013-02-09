@@ -26,10 +26,6 @@ pip-log.txt
 .tox
 nosetests.xml
 
-# Translations
-*.mo
+.idea
 
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
+Thumbs.db
