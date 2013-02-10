@@ -393,6 +393,15 @@ for subreddit in subreddits:
         emote['sr'] = subreddit
         emotes.append(emote)
 
+
+for mlp_emote in [x for x in emotes if x['sr'] == 'mylittlepony']:
+    for emote in [x for x in emotes if x['sr'] != 'mylittlepony']:
+        for name in mlp_emote['names']:
+            if name in emote['names']:
+                emote['names'].remove(name)
+                if len(emote['names']) == 0:
+                    emotes.remove(emote)
+
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
 emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))
 emote_data_file.close()
