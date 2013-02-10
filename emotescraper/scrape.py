@@ -115,15 +115,17 @@ emotes = []
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
 cj = CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), urllib2.HTTPHandler())
-formdata = { "user" : "ponymoteharvester", "passwd": "berry_punch", "rem" : False }
+formdata = {"user": "ponymoteharvester", "passwd": "berry_punch", "rem": False}
 opener.open("http://www.reddit.com/api/login", urllib.urlencode(formdata))
+
+rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
 for subreddit in subreddits:
     skip = False
     for i in range(0, 5):
         time.sleep(1)
         try:
-            headers = { 'User-Agent' : user_agent}
+            headers = {'User-Agent': user_agent}
             req = urllib2.Request(stylesheet_url_format.format(subreddit), None, headers)
             http_conn = opener.open(req)
             parser = tinycss.make_parser('page3')
@@ -140,12 +142,6 @@ for subreddit in subreddits:
     print "Subreddit:{}".format(subreddit)
     emotes_staging = defaultdict(dict)
     emote_regex = re.compile('a\[href\|?="/([\w]+)')
-
-    #height and width and url = animote or single
-    #just height/width is a sprite section
-    #just background-position edits a sprite section and sets up aliases
-
-    rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
     for rule in stylesheet.rules:
         if emote_regex.match(rule.selector.as_css()):
@@ -172,6 +168,6 @@ for subreddit in subreddits:
         emote['sr'] = subreddit
         emotes.append(emote)
 
-file = open('/NotWork/emotes.txt', 'wb')
+file = open('emotes.txt', 'wb')
 file.write(dumps(emotes))
 
