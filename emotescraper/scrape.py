@@ -337,7 +337,7 @@ subreddits = [
     "twilightsparkle",
     "vinylscratch"
 ]
-
+subreddits = ["berrytubelounge"]
 emotes = []
 
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
@@ -408,6 +408,10 @@ for mlp_emote in [x for x in emotes if x['sr'] == 'mylittlepony']:
 # in browsers that don't support apng.
 key_func = lambda e: e['background-image']
 for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
+    group = list(group)
+    # don't check for apng if there is more than 1 emote in the group. Chances are it's a spritesheet
+    if len(group) > 1:
+        continue
     # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
     req = urllib2.Request(image_url, None, headers)
     http_conn = opener.open(req)
