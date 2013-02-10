@@ -337,22 +337,23 @@ subreddits = [
     "twilightsparkle",
     "vinylscratch"
 ]
+
 emotes = []
 
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
 cj = CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), urllib2.HTTPHandler())
 formdata = {"user": "ponymoteharvester", "passwd": "berry_punch", "rem": False}
-opener.open("http://www.reddit.com/api/login", urllib.urlencode(formdata))
-
+http_conn = opener.open("http://www.reddit.com/api/login", urllib.urlencode(formdata))
+http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
+headers = {'User-Agent': user_agent}
 
 for subreddit in subreddits:
     skip = False
     for i in range(0, 5):
         time.sleep(1)
         try:
-            headers = {'User-Agent': user_agent}
             req = urllib2.Request(stylesheet_url_format.format(subreddit), None, headers)
             http_conn = opener.open(req)
             parser = tinycss.make_parser('page3')
@@ -378,7 +379,7 @@ for subreddit in subreddits:
                 for declaration in rule.declarations:
                     if declaration.name in rules_we_care_about:
                         if declaration.name == 'background-position':
-                            val = ['{}{}'.format(v.value, v.unit) for v in declaration.value if v.value != ' ']
+                            val = ['{}{}'.format(v.value, v.unit if v.unit else '') for v in declaration.value if v.value != ' ']
                         else:
                             val = declaration.value[0].value
                         rules[declaration.name] = val
@@ -402,6 +403,21 @@ for mlp_emote in [x for x in emotes if x['sr'] == 'mylittlepony']:
                 emote['names'].remove(name)
                 if len(emote['names']) == 0:
                     emotes.remove(emote)
+
+# Check for apngs. For now we are just going to tag these and try and do some browser side canvas magic to display them
+# in browsers that don't support apng.
+key_func = lambda e: e['background-image']
+for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
+    # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
+    req = urllib2.Request(image_url, None, headers)
+    http_conn = opener.open(req)
+    image_str = http_conn.read()
+    http_conn.close()
+    time.sleep(1)
+    if 'acTL' in image_str[0:image_str.find('IDAT')]:
+        for emote in group:
+            emote['apng'] = True
+        print 'found an apng: ' + image_url
 
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
 emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))
