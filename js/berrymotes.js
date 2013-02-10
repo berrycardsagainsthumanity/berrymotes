@@ -1,3 +1,5 @@
+
+
 var apply_emotes = function (chat_message) {
     var emote_regex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
     var match;
@@ -16,13 +18,14 @@ var apply_emotes = function (chat_message) {
             var emote = berry_emote_map[match[1]];
             if (emote) {
                 emote = berryemotes[emote];
+                if(show_nsfw_emotes === false && emote.nsfw) continue;
                 var pos = (emote['background-position'] || [0, 0] );
                 position_string = '';
                 for (var a = 0; a < pos.length; ++a) {
                     position_string += pos[a] + "px ";
                 }
                 emote['position_string'] = position_string;
-                var emote_dom = $('<span class="berry_emote"></span>');
+                //var emote_dom = $('<span class="berry_emote"></span>');
                 var emote_code =
                     ['<span style="',
                         'background-image: url(', emote['background-image'], '); ',
