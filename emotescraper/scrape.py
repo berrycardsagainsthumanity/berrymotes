@@ -168,6 +168,7 @@ for subreddit in subreddits:
         emote['sr'] = subreddit
         emotes.append(emote)
 
-file = open('emotes.txt', 'wb')
-file.write(dumps(emotes))
+emote_data_file = open('../js/berrymotes_data.js', 'wb')
+emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))
+emote_data_file.close()
 
