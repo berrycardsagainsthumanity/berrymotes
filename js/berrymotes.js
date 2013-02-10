@@ -20,14 +20,11 @@ var apply_emotes = function (chat_message) {
                 emote = berryemotes[emote];
                 if(show_nsfw_emotes === false && emote.nsfw) continue;
                 var pos = (emote['background-position'] || ['0px', '0px']);
-                position_string = '';
-                for (var a = 0; a < pos.length; ++a) {
-                    position_string += pos[a];
-                }
+                position_string = pos.join(' ');
                 emote['position_string'] = position_string;
                 var emote_code =
                     ['<span class="berryemote',
-                        emote.height > max_emote_height ? 'resize' : '',
+                        emote.height > max_emote_height ? ' resize' : '',
                         '" ',
                         'style="',
                         'background-image: url(', emote['background-image'], '); ',
@@ -42,11 +39,11 @@ var apply_emotes = function (chat_message) {
                 chat_message = chat_message.replace(replace_regex, emote_code);
             }
         }
-        chat_message = $(chat_message);
+        chat_message = $('<span/>').append(chat_message);
         var emotes_to_resize = chat_message.find('.resize');
         $.each(emotes_to_resize, function(i, emote){
             var $emote = $(emote);
-            var scale =  max_height / $emote.height();
+            var scale =  max_emote_height / $emote.height();
             var innerwrap = $emote.wrap('<div class="emote-wrapper"><div class="emote-wrapper"></div></div>').parent();
             var outerwrap = innerwrap.parent();
             outerwrap.css('height', $emote.height() * scale);
