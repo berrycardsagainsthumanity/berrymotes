@@ -337,7 +337,6 @@ subreddits = [
     "twilightsparkle",
     "vinylscratch"
 ]
-subreddits = ["berrytubelounge"]
 emotes = []
 
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
