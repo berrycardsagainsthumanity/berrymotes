@@ -42,7 +42,9 @@ function get_emote_html(emote) {
     }
     else {
         emote_code =
-            ['<span class="berryemote canvasapng" ',
+            ['<span class="berryemote canvasapng ',
+                emote.height > max_emote_height ? ' resize' : '',
+                '" ',
                 'style="',
                 'height:', emote.height, 'px; ',
                 'width:', emote.width, 'px; ',
