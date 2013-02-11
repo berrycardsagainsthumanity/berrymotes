@@ -393,7 +393,9 @@ for subreddit in subreddits:
                 emote.update(meta_data)
                 break
         emote['sr'] = subreddit
-        emotes.append(emote)
+        # need at least an image for a ponymote. Some trash was getting in.
+        if 'background-image' in emote:
+            emotes.append(emote)
 
 for mlp_emote in [x for x in emotes if x['sr'] == 'mylittlepony']:
     for emote in [x for x in emotes if x['sr'] != 'mylittlepony']:
