@@ -1,5 +1,6 @@
 from cookielib import CookieJar
 import itertools
+import os
 import urllib
 import tinycss
 import urllib2
@@ -337,19 +338,25 @@ subreddits = [
     "twilightsparkle",
     "vinylscratch"
 ]
+# subreddits = ["berrytubelounge"]
 emotes = []
 
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
 cj = CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), urllib2.HTTPHandler())
 formdata = {"user": "ponymoteharvester", "passwd": "berry_punch", "rem": False}
-http_conn = opener.open("http://www.reddit.com/api/login", urllib.urlencode(formdata))
+headers = {'User-Agent': user_agent}
+req = urllib2.Request("http://www.reddit.com/api/login", None, headers)
+http_conn = opener.open(req, urllib.urlencode(formdata))
 http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
-headers = {'User-Agent': user_agent}
+
+emote_regex = re.compile('a\[href\|?="/([\w]+)')
+folder_regex = re.compile('http://(.)')
 
 for subreddit in subreddits:
     skip = False
+    stylesheet = None
     for i in range(0, 5):
         time.sleep(1)
         try:
@@ -368,17 +375,16 @@ for subreddit in subreddits:
         continue
     print "Subreddit:{}".format(subreddit)
     emotes_staging = defaultdict(dict)
-    emote_regex = re.compile('a\[href\|?="/([\w]+)')
 
     for rule in stylesheet.rules:
         if emote_regex.match(rule.selector.as_css()):
-            m = emote_regex.search(rule.selector.as_css())
             for match in emote_regex.finditer(rule.selector.as_css()):
                 rules = {}
                 for declaration in rule.declarations:
                     if declaration.name in rules_we_care_about:
                         if declaration.name == 'background-position':
-                            val = ['{}{}'.format(v.value, v.unit if v.unit else '') for v in declaration.value if v.value != ' ']
+                            val = ['{}{}'.format(v.value, v.unit if v.unit else '') for v in declaration.value if
+                                   v.value != ' ']
                         else:
                             val = declaration.value[0].value
                         rules[declaration.name] = val
@@ -413,7 +419,7 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
     # don't check for apng if there is more than 1 emote in the group. Chances are it's a spritesheet
     if len(group) > 1:
         continue
-    # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
+        # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
     req = urllib2.Request(image_url, None, headers)
     http_conn = opener.open(req)
     image_str = http_conn.read()
@@ -422,7 +428,20 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
     if 'acTL' in image_str[0:image_str.find('IDAT')]:
         for emote in group:
             emote['apng'] = True
-        print 'found an apng: ' + image_url
+            file_name = image_url[image_url.rfind('/') + 1:]
+            folder_name = folder_regex.search(image_url).group(1)
+            folder_array = ['../images', folder_name]
+            if not os.path.exists('../images'):
+                os.makedirs('../images')
+            if not os.path.exists('/'.join(folder_array)):
+                os.makedirs('/'.join(folder_array))
+            folder_array.append(file_name)
+            image_file = open('/'.join(folder_array), 'wb')
+            image_file.write(image_str)
+            image_file.close()
+            url_format = 'http://backstage.berrytube.tv/marminator/images/{}/{}'
+            emote['apng_url'] = url_format.format(folder_name, file_name)
+            print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
 
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
 emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))
