@@ -54,21 +54,6 @@ function get_emote_html(emote) {
     return emote_code;
 }
 
-function resize_emote(emote) {
-    var $emote = $(emote);
-    var scale = max_emote_height / $emote.height();
-    var innerwrap = $emote.wrap('<div class="emote-wrapper"><div class="emote-wrapper"></div></div>').parent();
-    var outerwrap = innerwrap.parent();
-    outerwrap.css('height', $emote.height() * scale);
-    outerwrap.css('width', $emote.width() * scale);
-    outerwrap.css('display', 'inline-block');
-    outerwrap.css('position', 'relative');
-    innerwrap.css('transform', ['scale(', scale, ', ', scale, ')'].join(''));
-    innerwrap.css('transform-origin', 'left top');
-    innerwrap.css('position', 'absolute');
-    innerwrap.css('top', '0');
-    innerwrap.css('left', '0');
-}
 
 function resize_and_animate(message) {
     if (!apng_supported) {
@@ -83,9 +68,22 @@ function resize_and_animate(message) {
 
     var emotes_to_resize = message.find('.resize');
     $.each(emotes_to_resize, function (i, emote) {
-        resize_emote(emote);
+        var $emote = $(emote);
+        var scale = max_emote_height / $emote.height();
+        var innerwrap = $emote.wrap('<div class="emote-wrapper"><div class="emote-wrapper"></div></div>').parent();
+        var outerwrap = innerwrap.parent();
+        outerwrap.css('height', $emote.height() * scale);
+        outerwrap.css('width', $emote.width() * scale);
+        outerwrap.css('display', 'inline-block');
+        outerwrap.css('position', 'relative');
+        innerwrap.css('transform', ['scale(', scale, ', ', scale, ')'].join(''));
+        innerwrap.css('transform-origin', 'left top');
+        innerwrap.css('position', 'absolute');
+        innerwrap.css('top', '0');
+        innerwrap.css('left', '0');
     });
 }
+
 function apply_emotes_to_chat(chat_message) {
     if (berry_emotes_enabled && chat_message.match(emote_regex)) {
         chat_message = apply_emotes_to_str(chat_message);
@@ -119,7 +117,7 @@ function monkey_patch_poll() {
         oldPoll(data);
         var poll = $('.poll.active');
         var options = poll.find('div.label');
-        $.each(options, function(i, option){
+        $.each(options, function (i, option) {
             var $option = $(option);
             console.log(option);
             var t = $option.text().replace(">", "&gt;").replace("<", "&lt;");
@@ -164,8 +162,6 @@ function wait_to_start() {
     apngTest.onload = function () {
         ctx.drawImage(apngTest, 0, 0);
         self.apng_supported = ctx.getImageData(0, 0, 1, 1).data[3] === 0;
-        // TODO: Hardcoded to true until cross domain stuff.
-        self.apng_supported = true;
         if (!self.apng_supported) {
             // If we don't have apng support we're gonna load up the canvas hack. No reason to load if apng support exists.
             var script = document.createElement('script');
