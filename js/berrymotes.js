@@ -2,7 +2,9 @@ var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
 var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') !== "false";
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') !== "false";
-var apngSupported = localStorage.getItem('apngSupported') !== "false";
+var apngSupported = localStorage.getItem('apngSupported');
+// Leaving as none so we can test for it later on.
+if (apngSupported === "false") apngSupported = false;
 var berryEmoteMap = {};
 var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
 
@@ -154,7 +156,7 @@ function injectSettingsButton() {
 }
 
 function waitToStart() {
-    if(typeof berryEmotes === "undefined" && typeof berryemotes != "undefined") berryEmotes = berryemotes;
+    if (typeof berryEmotes === "undefined" && typeof berryemotes != "undefined") berryEmotes = berryemotes;
     if (typeof formatChatMsg === "undefined" || typeof berryEmotes === "undefined" ||
         typeof apngSupported === "undefined" ||
         (apngSupported ? false : typeof APNG === "undefined")) {
@@ -237,7 +239,7 @@ if (apngSupported === null) {
         // frame 2: [0, 0, 0, 0]
     }());
 }
-else if (apngSupported === false){
+else if (apngSupported === false) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
