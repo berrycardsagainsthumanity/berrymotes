@@ -1,8 +1,8 @@
-var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') || true;
-var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') || false;
-var maxEmoteHeight = localStorage.getItem('maxEmoteHeight') || 200;
-var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') || false;
-var apngSupported = localStorage.getItem('apngSupported');
+var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
+var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') !== "false";
+var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
+var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') !== "false";
+var apngSupported = localStorage.getItem('apngSupported') !== "false";
 var berryEmoteMap = {};
 var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
 
