@@ -1,7 +1,7 @@
 var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
 var showNsfwEmotes = localStorage.getItem('showNsfwEmotes');
 if (showNsfwEmotes === null) showNsfwEmotes = false;
-else if (showNsfwEmotes === "true" || showNsfwEmotes === true) showNsfwEmotes = true;
+else if (showNsfwEmotes === "true") showNsfwEmotes = true;
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug');
 berryEmotesDebug = berryEmotesDebug === "true" || berryEmotesDebug === true;
