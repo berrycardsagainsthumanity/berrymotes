@@ -44,8 +44,9 @@ function getEmoteHtml(emote) {
     }
     else {
         emoteCode =
-            ['<span class="berryemote canvasapng" ',
-                'style="',
+            ['<span class="berryemote canvasapng ',
+                emote.height > maxEmoteHeight ? ' resize' : '',
+                '" ',
                 'height:', emote.height, 'px; ',
                 'width:', emote.width, 'px; ',
                 'display:inline-block;',
