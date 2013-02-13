@@ -43,7 +43,7 @@ function getEmoteHtml(emote) {
             ].join('');
     }
     else {
-        emote_code =
+        emoteCode =
             ['<span class="berryemote canvasapng',
                 emote.height > maxEmoteHeight ? ' resize' : '',
                 '" ',
@@ -61,8 +61,8 @@ function getEmoteHtml(emote) {
 
 function postEmoteEffects(message) {
     if (!apngSupported) {
-        var emotes_to_animate = message.find('.canvasapng');
-        $.each(emotes_to_animate, function (i, emote) {
+        var emotesToAnimate = message.find('.canvasapng');
+        $.each(emotesToAnimate, function (i, emote) {
             var $emote = $(emote);
             APNG.createAPNGCanvas($emote.attr('apng_url'), function (canvas) {
                 $emote.append(canvas);
