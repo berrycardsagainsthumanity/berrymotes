@@ -237,7 +237,7 @@ if (apngSupported === null) {
         // frame 2: [0, 0, 0, 0]
     }());
 }
-else if (apngSupported === false){
+else if (apngSupported === false || apngSupported === "false"){
     var script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
