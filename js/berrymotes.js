@@ -1,5 +1,7 @@
 var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
-var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') !== "false";
+var showNsfwEmotes = localStorage.getItem('showNsfwEmotes');
+if (showNsfwEmotes === null) showNsfwEmotes = false;
+if (showNsfwEmotes == "true") showNsfwEmotes = true;
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') !== "false";
 var apngSupported = localStorage.getItem('apngSupported');
