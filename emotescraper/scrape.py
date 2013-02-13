@@ -81,7 +81,7 @@ emote_info = [
         'nsfw': True
     },
     {
-        'sr': 'futemotese',
+        'sr': 'futemotes',
         'name': 'fut1',
         'nsfw': True
     },
