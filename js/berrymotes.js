@@ -4,7 +4,7 @@ if (showNsfwEmotes === null) showNsfwEmotes = false;
 else if (showNsfwEmotes === "true") showNsfwEmotes = true;
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug');
-berryEmotesDebug = berryEmotesDebug === "true" || berryEmotesDebug === true;
+berryEmotesDebug = berryEmotesDebug === "true";
 var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
