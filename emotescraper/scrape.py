@@ -244,6 +244,7 @@ emote_info = [
 
 stylesheet_url_format = "http://www.reddit.com/r/{}/stylesheet"
 subreddits = [
+    "mylittlepony",
     "adviceponies",
     "ainbowdash",
     "applebloom",
@@ -307,7 +308,6 @@ subreddits = [
     "mylittlenosleep",
     "mylittlensfw",
     "mylittleonions",
-    "mylittlepony",
     "mylittleserver",
     "mylittlesh",
     "mylittlesports",
@@ -402,17 +402,23 @@ for subreddit in subreddits:
         # need at least an image for a ponymote. Some trash was getting in.
         if 'background-image' in emote:
             emotes.append(emote)
-
-for mlp_emote in [x for x in emotes if x['sr'] == 'mylittlepony']:
-    for emote in [x for x in emotes if x['sr'] != 'mylittlepony']:
-        for name in mlp_emote['names']:
-            if name in emote['names']:
-                emote['names'].remove(name)
-                if len(emote['names']) == 0:
-                    emotes.remove(emote)
+#dedupe, subreddits list order wins
+for subreddit in subreddits:
+    for subreddit_emote in [x for x in emotes if x['sr'] == subreddit]:
+        for emote in [x for x in emotes if x['sr'] != subreddit]:
+            for name in subreddit_emote['names']:
+                if name in emote['names']:
+                    print "deduping name: " + name
+                    emote['names'].remove(name)
+                    if len(emote['names']) == 0:
+                        print "removing: " + name
+                        emotes.remove(emote)
 
 # Check for apngs. For now we are just going to tag these and try and do some browser side canvas magic to display them
 # in browsers that don't support apng.
+if not os.path.exists('../images'):
+    os.makedirs('../images')
+
 key_func = lambda e: e['background-image']
 for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
     group = list(group)
@@ -420,28 +426,35 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
     if len(group) > 1:
         continue
         # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
-    req = urllib2.Request(image_url, None, headers)
-    http_conn = opener.open(req)
-    image_str = http_conn.read()
-    http_conn.close()
+
     time.sleep(1)
-    if 'acTL' in image_str[0:image_str.find('IDAT')]:
+    file_name = image_url[image_url.rfind('/') + 1:]
+    folder_name = folder_regex.search(image_url).group(1)
+    folder_array = ['../images', folder_name]
+    path_array = folder_array[:]
+    path_array.append(file_name)
+    file_path = '/'.join(path_array)
+    # If we've persisted it already it's an apng. This may change later if we decide to cache \\everything
+    if os.path.isfile(file_path):
         for emote in group:
-            emote['apng'] = True
-            file_name = image_url[image_url.rfind('/') + 1:]
-            folder_name = folder_regex.search(image_url).group(1)
-            folder_array = ['../images', folder_name]
-            if not os.path.exists('../images'):
-                os.makedirs('../images')
-            if not os.path.exists('/'.join(folder_array)):
-                os.makedirs('/'.join(folder_array))
-            folder_array.append(file_name)
-            image_file = open('/'.join(folder_array), 'wb')
-            image_file.write(image_str)
-            image_file.close()
             url_format = 'http://backstage.berrytube.tv/marminator/images/{}/{}'
             emote['apng_url'] = url_format.format(folder_name, file_name)
-            print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
+    else:
+        req = urllib2.Request(image_url, None, headers)
+        http_conn = opener.open(req)
+        image_str = http_conn.read()
+        http_conn.close()
+        if 'acTL' in image_str[0:image_str.find('IDAT')]:
+            for emote in group:
+                emote['apng'] = True
+                if not os.path.exists('/'.join(folder_array)):
+                    os.makedirs('/'.join(folder_array))
+                image_file = open(file_path, 'wb')
+                image_file.write(image_str)
+                image_file.close()
+                url_format = 'http://backstage.berrytube.tv/marminator/images/{}/{}'
+                emote['apng_url'] = url_format.format(folder_name, file_name)
+                print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
 
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
 emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))

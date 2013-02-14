@@ -1,10 +1,7 @@
 var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
-var showNsfwEmotes = localStorage.getItem('showNsfwEmotes');
-if (showNsfwEmotes === null) showNsfwEmotes = false;
-else if (showNsfwEmotes === "true") showNsfwEmotes = true;
+var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') === "true";
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
-var berryEmotesDebug = localStorage.getItem('berryEmotesDebug');
-berryEmotesDebug = berryEmotesDebug === "true";
+var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
@@ -14,11 +11,11 @@ var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
 function applyEmotesToStr(chatMessage) {
     var match;
     while (match = emoteRegex.exec(chatMessage)) {
-        var emote = berryEmoteMap[match[1]];
-        if (emote) {
-            emote = berryEmotes[emote];
+        var emote_id = berryEmoteMap[match[1]];
+        if (emote_id) {
+            var emote = berryEmotes[emote_id];
             if (showNsfwEmotes === false && emote.nsfw) continue;
-            var emote_code = getEmoteHtml(emote);
+            var emote_code = getEmoteHtml(emote, emote_id);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
             var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1] , ')[-\\w]*\\)'].join(''), 'g');
             chatMessage = chatMessage.replace(replace_regex, emote_code);
@@ -27,7 +24,7 @@ function applyEmotesToStr(chatMessage) {
     return chatMessage;
 }
 
-function getEmoteHtml(emote) {
+function getEmoteHtml(emote, emote_id) {
     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
     emote['position_string'] = position_string;
     var emoteCode;
@@ -53,9 +50,10 @@ function getEmoteHtml(emote) {
                 'style="',
                 'height:', emote.height, 'px; ',
                 'width:', emote.width, 'px; ',
-                'display:inline-block;',
+                'display:inline-block; ',
+                'position: relative; overflow: hidden;',
                 '" title="', emote.names, ' from ', emote.sr, '" ',
-                'apng_url="', emote['apng_url'] , '"></span>'
+                'emote_id="', emote_id , '"></span>'
             ].join('');
     }
     return emoteCode;
@@ -65,10 +63,16 @@ function getEmoteHtml(emote) {
 function postEmoteEffects(message) {
     if (!apngSupported) {
         var emotesToAnimate = message.find('.canvasapng');
-        $.each(emotesToAnimate, function (i, emote) {
-            var $emote = $(emote);
-            APNG.createAPNGCanvas($emote.attr('apng_url'), function (canvas) {
+        $.each(emotesToAnimate, function (i, emoteDom) {
+            var $emote = $(emoteDom);
+            var emote = berryEmotes[$emote.attr('emote_id')];
+            APNG.createAPNGCanvas(emote.apng_url, function (canvas) {
+                var position = (emote['background-position'] || ['0px', '0px']);
+                var $canvas = $(canvas);
                 $emote.append(canvas);
+                $canvas.css('position', 'absolute');
+                $canvas.css('left', position[0]);
+                $canvas.css('top', position[1]);
             });
         });
     }
