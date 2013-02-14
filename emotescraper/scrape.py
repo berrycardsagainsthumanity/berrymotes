@@ -421,13 +421,6 @@ if not os.path.exists('../images'):
 
 key_func = lambda e: e['background-image']
 for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
-    group = list(group)
-    # don't check for apng if there is more than 1 emote in the group. Chances are it's a spritesheet
-    if len(group) > 1:
-        continue
-        # php code to detect apng: if(strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL')!==false){
-
-    time.sleep(1)
     file_name = image_url[image_url.rfind('/') + 1:]
     folder_name = folder_regex.search(image_url).group(1)
     folder_array = ['../images', folder_name]
@@ -440,13 +433,27 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
             url_format = 'http://backstage.berrytube.tv/marminator/images/{}/{}'
             emote['apng_url'] = url_format.format(folder_name, file_name)
     else:
-        req = urllib2.Request(image_url, None, headers)
-        http_conn = opener.open(req)
-        image_str = http_conn.read()
-        http_conn.close()
+        group = list(group)
+        # don't check for apng if there is more than 1 emote in the group. Chances are it's a spritesheet
+        if len(group) > 1:
+            continue
+
+        skip = False
+        for i in range(0, 5):
+            try:
+                time.sleep(1)
+                req = urllib2.Request(image_url, None, headers)
+                http_conn = opener.open(req)
+                image_str = http_conn.read()
+                http_conn.close()
+            except Exception, exc:
+                if i > 4:
+                    skip = True
+                print exc
+        if skip:
+            continue
         if 'acTL' in image_str[0:image_str.find('IDAT')]:
             for emote in group:
-                emote['apng'] = True
                 if not os.path.exists('/'.join(folder_array)):
                     os.makedirs('/'.join(folder_array))
                 image_file = open(file_path, 'wb')
@@ -455,8 +462,9 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
                 url_format = 'http://backstage.berrytube.tv/marminator/images/{}/{}'
                 emote['apng_url'] = url_format.format(folder_name, file_name)
                 print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
-
+        else:
+            print "Didn't find an apng: " + image_url
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
-emote_data_file.write("var berryemotes = {};".format(dumps(emotes)))
+emote_data_file.write("var berryEmotes = {};".format(dumps(emotes)))
 emote_data_file.close()
 

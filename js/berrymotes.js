@@ -28,7 +28,7 @@ function getEmoteHtml(emote, emote_id) {
     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
     emote['position_string'] = position_string;
     var emoteCode;
-    if (apngSupported || !emote.apng) {
+    if (apngSupported || !emote.apng_url) {
         emoteCode =
             ['<span class="berryemote',
                 emote.height > maxEmoteHeight ? ' resize' : '',
