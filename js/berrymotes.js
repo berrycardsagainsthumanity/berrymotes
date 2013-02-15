@@ -12,7 +12,7 @@ function applyEmotesToStr(chatMessage) {
     var match;
     while (match = emoteRegex.exec(chatMessage)) {
         var emote_id = berryEmoteMap[match[1]];
-        if (emote_id) {
+        if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote, emote_id);
