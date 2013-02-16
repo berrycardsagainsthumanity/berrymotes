@@ -15,7 +15,7 @@ function applyEmotesToStr(chatMessage) {
         if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
             if (showNsfwEmotes === false && emote.nsfw) continue;
-            var emote_code = getEmoteHtml(emote, emote_id);
+            var emote_code = getEmoteHtml(emote);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
             var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1] , ')[-\\w]*\\)'].join(''), 'g');
             chatMessage = chatMessage.replace(replace_regex, emote_code);
@@ -24,7 +24,7 @@ function applyEmotesToStr(chatMessage) {
     return chatMessage;
 }
 
-function getEmoteHtml(emote, emote_id) {
+function getEmoteHtml(emote) {
     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
     emote['position_string'] = position_string;
     var emoteCode;
@@ -39,7 +39,8 @@ function getEmoteHtml(emote, emote_id) {
                 'width:', emote.width, 'px; ',
                 'background-position:', position_string, '; ',
                 'display:inline-block;',
-                '" title="', emote.names, ' from ', emote.sr, '"></span>'
+                '" title="', emote.names, ' from ', emote.sr, '" ',
+                'emote_id="', emote.id , '"></span>'
             ].join('');
     }
     else {
@@ -53,7 +54,7 @@ function getEmoteHtml(emote, emote_id) {
                 'display:inline-block; ',
                 'position: relative; overflow: hidden;',
                 '" title="', emote.names, ' from ', emote.sr, '" ',
-                'emote_id="', emote_id , '"></span>'
+                'emote_id="', emote.id , '"></span>'
             ].join('');
     }
     return emoteCode;
@@ -144,28 +145,32 @@ function buildEmoteMap() {
     for (var i = 0; i < max; ++i) {
         var berryemote = berryEmotes[i];
         for (var j = 0; j < berryemote.names.length; ++j) {
-            if (!berryEmoteMap[berryemote.names[j]]) {
-                berryEmoteMap[berryemote.names[j]] = i;
-            }
+            berryEmoteMap[berryemote.names[j]] = i;
+            berryEmotes[i].id = i;
         }
     }
 }
 
-function injectSettingsButton() {
+function injectEmoteButton() {
     whenExists('#chatControls', function () {
         if (berryEmotesDebug) console.log('Injecting settings button.');
         var settingsMenu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Emotes");
         settingsMenu.css('margin-right', '2px');
         settingsMenu.css('background', 'url(http://backstage.berrytube.tv/marminator/bp.png) no-repeat scroll left center transparent');
         settingsMenu.click(function () {
-            showBerrymoteConfig();
+            showBerrymoteSearch();
+        });
+        $(window).keydown(function(event) {
+            if (!(event.keyCode == 69 && event.ctrlKey)) return true;
+            showBerrymoteSearch();
+            event.preventDefault();
+            return false;
         });
         if (berryEmotesDebug) console.log('Settings button injected: ', settingsMenu);
     });
 }
 
 function waitToStart() {
-    if (typeof berryEmotes === "undefined" && typeof berryemotes != "undefined") berryEmotes = berryemotes;
     if (typeof formatChatMsg === "undefined" || typeof berryEmotes === "undefined" ||
         typeof apngSupported === "undefined" ||
         (apngSupported ? false : typeof APNG === "undefined")) {
@@ -177,8 +182,152 @@ function waitToStart() {
         buildEmoteMap();
         monkeyPatchChat();
         monkeyPatchPoll();
-        injectSettingsButton();
+        injectEmoteButton();
     }
+}
+
+var berryEmoteSearchTerm;
+function showBerrymoteSearch() {
+    var searchWin = $("body").dialogWindow({
+        title: "BerryEmote Search",
+        uid: "berryEmoteSearch",
+        center: true
+    });
+    if (berryEmotesDebug) console.log('Search window: ', searchWin);
+    var settingsMenu = $('<div style="float: right; cursor: pointer; text-decoration: underline;" />')
+        .appendTo(searchWin)
+        .text("Settings");
+    settingsMenu.click(function () {
+        showBerrymoteConfig();
+    });
+
+    var searchTimer;
+    var pageSize = 50;
+    var page = 0;
+    var searchResults = [];
+    var $searchBox = $('<input class="berrymotes_search" type="text" placeholder="Search..." />').appendTo(searchWin);
+    if (berryEmoteSearchTerm) {
+        $searchBox.val(berryEmoteSearchTerm);
+    }
+    $searchBox.focus();
+    $searchBox.select();
+
+    $('<span class="prev_page" style="cursor: pointer; text-decoration: underline;" />')
+        .appendTo(searchWin)
+        .text("< Prev");
+    $('<span class="next_page" style="cursor: pointer; text-decoration: underline; margin-left:5px;" />')
+        .appendTo(searchWin)
+        .text("Next >");
+    $('<span class="num_found" style="margin-left: 5px;" />')
+        .appendTo(searchWin);
+
+    var $results = $('<div class="berrymotes_search_results" style="width:500px; height: 500px; overflow-y: scroll;" ></div>').appendTo(searchWin);
+    $results.on('click', '.berryemote', function (e) {
+        var chatInput = $('#chatinput').find('input');
+        var $emote = $(e.currentTarget);
+        var emote = berryEmotes[$emote.attr('emote_id')];
+        chatInput.val([chatInput.val(), '[](/', emote.names[0], ')'].join(''));
+        searchWin.parent('.dialogWindow').hide();
+    });
+
+    searchWin.on('click', '.next_page, .prev_page', function (e) {
+        var $button = $(e.currentTarget);
+        if ($button.is('.next_page')) {
+            if ((page === 0 && searchResults.length > pageSize) ||
+                (page > 0 && page < Math.floor((searchResults.length / ((page) * pageSize))))) {
+                page++;
+            }
+        }
+        else if (page > 0) {
+            page--;
+        }
+        showSearchResults();
+    });
+
+    var showSearchResults = function () {
+        var max = Math.min(pageSize, searchResults.length);
+        $results.html('');
+        var start = page * pageSize;
+        var max = Math.min(start + pageSize, searchResults.length);
+        for (var i = start; i < max; ++i) {
+            var emote = $('<span style="margin: 2px;" />').append(getEmoteHtml(berryEmotes[searchResults[i]]));
+            postEmoteEffects(emote);
+            $results.append(emote);
+        }
+        $('.num_found').text('Found: ' + searchResults.length);
+    };
+
+    var berryEmoteSearch = function () {
+        searchResults = [];
+        var term = $searchBox.val();
+        berryEmoteSearchTerm = term;
+        if (!term) {
+            var max = berryEmotes.length;
+            for (var i = 0; i < max; ++i) {
+                searchResults.push(i);
+            }
+        }
+        else {
+            var isTagSearch = term.match(/^\+/);
+            var isSubredditSearch = term.match(/^sr:/);
+            var shittyDrunkenRegex;
+            var searchField;
+            if (isTagSearch) {
+                shittyDrunkenRegex = new RegExp('^' + $.trim(term.substring(1)), 'i');
+                searchField = 'tags';
+            }
+            else if (isSubredditSearch) {
+                shittyDrunkenRegex = new RegExp('^' + $.trim(term.substring(3)), 'i');
+                searchField = 'sr';
+            }
+            else {
+                shittyDrunkenRegex = new RegExp(term, 'i');
+                searchField = 'names';
+            }
+            var max = berryEmotes.length;
+            for (var i = 0; i < max; ++i) {
+                var emote = berryEmotes[i];
+                if (showNsfwEmotes === false && emote.nsfw) continue;
+                if (!emote[searchField]) continue;
+                if ($.isArray(emote[searchField])) {
+                    for (var j = 0; j < emote[searchField].length; ++j) {
+                        if (emote[searchField][j].match(shittyDrunkenRegex)) {
+                            searchResults.push(emote.id);
+                            break;
+                        }
+                    }
+                }
+                else {
+                    if (emote[searchField].match(shittyDrunkenRegex)) {
+                        searchResults.push(emote.id);
+                    }
+                }
+            }
+        }
+        page = 0;
+        showSearchResults();
+    };
+
+    $searchBox.keyup(function (e) {
+        clearTimeout(searchTimer);
+        if (e.keyCode == 13) {
+            berryEmoteSearch();
+        }
+        else {
+            searchTimer = setTimeout(berryEmoteSearch, 250);
+        }
+    });
+
+    berryEmoteSearch();
+
+    $('<span class="prev_page" style="cursor: pointer; text-decoration: underline;" />')
+        .appendTo(searchWin)
+        .text("< Prev");
+    $('<span class="next_page" style="cursor: pointer; text-decoration: underline; margin-left:5px;" />')
+        .appendTo(searchWin)
+        .text("Next >");
+
+    searchWin.window.center();
 }
 
 function showBerrymoteConfig() {

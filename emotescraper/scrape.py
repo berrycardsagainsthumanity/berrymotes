@@ -72,6 +72,8 @@ for subreddit in subreddits:
             if meta_data:
                 emote.update(meta_data)
                 break
+            if subreddit in nsfw_subreddits:
+                emote['nsfw'] = True
         emote['sr'] = subreddit
         # need at least an image for a ponymote. Some trash was getting in.
         if 'background-image' in emote:

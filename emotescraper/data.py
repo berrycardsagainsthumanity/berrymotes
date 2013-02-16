@@ -1,3 +1,7 @@
+nsfw_subreddits = [
+    "mylittlensfw"
+]
+
 checked_images = [
     #spritesheets
     "http://a.thumbs.redditmedia.com/-dL2k6urlB4KN6hH.png",
@@ -841,6 +845,11 @@ emote_info = [
     {
         'sr': 'mylittlensfw',
         'name': 'derpyshake',
+        'nsfw': True
+    },
+    {
+        'sr': 'mylittlensfw',
+        'name': 'derpypussy',
         'nsfw': True
     },
     {
