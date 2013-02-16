@@ -696,6 +696,7 @@ checked_images = [
 ]
 
 subreddits = [
+    "ponyemotecleanup",
     "mylittlepony",
     "adviceponies",
     "ainbowdash",
