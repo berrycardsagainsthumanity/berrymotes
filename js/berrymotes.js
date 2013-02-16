@@ -234,7 +234,7 @@ function showBerrymoteSearch() {
         var $button = $(e.currentTarget);
         if ($button.is('.next_page')) {
             if ((page === 0 && searchResults.length > pageSize) ||
-                (page > 0 && page < Math.floor((searchResults.length / ((page) * pageSize))))) {
+                (page > 0 && Math.floor((searchResults.length - (page * pageSize)) / pageSize ) > 0)) {
                 page++;
             }
         }
