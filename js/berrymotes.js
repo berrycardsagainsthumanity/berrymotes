@@ -6,7 +6,7 @@ var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
 var berryEmoteMap;
-var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
+var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/gi;
 var berryEmoteSearchTerm;
 var berryEmotePage = 0;
 
@@ -19,7 +19,7 @@ function applyEmotesToStr(chatMessage) {
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1] , ')[-\\w]*\\)'].join(''), 'g');
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1] , ')[-\\w]*\\)'].join(''), 'gi');
             chatMessage = chatMessage.replace(replace_regex, emote_code);
         }
     }
@@ -181,7 +181,7 @@ function injectEmoteButton() {
         });
         $(window).keydown(function (event) {
             if ((event.keyCode == 69 && event.ctrlKey) ||
-                event.keyCode == 27) {
+                (event.keyCode == 27 && $('.berrymotes_search_results').length)) {
                 if($('.berrymotes_search_results').length){
                     $('.dialogWindow').remove();
                 }
