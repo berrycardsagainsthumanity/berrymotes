@@ -76,7 +76,7 @@ for subreddit in subreddits:
                 emote['nsfw'] = True
         emote['sr'] = subreddit
         # need at least an image for a ponymote. Some trash was getting in.
-        if 'background-image' in emote:
+        if 'background-image' in emote and emote['background-image'] not in image_blacklist:
             emotes.append(emote)
 #dedupe, subreddits list order wins
 for subreddit in subreddits:

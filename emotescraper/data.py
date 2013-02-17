@@ -2,6 +2,10 @@ nsfw_subreddits = [
     "mylittlensfw"
 ]
 
+image_blacklist = [
+    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png"
+]
+
 checked_images = [
     #spritesheets
     "http://a.thumbs.redditmedia.com/-dL2k6urlB4KN6hH.png",
