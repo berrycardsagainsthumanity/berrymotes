@@ -24,21 +24,23 @@ function applyEmotesToStr(chatMessage) {
     return chatMessage;
 }
 
-function getEmoteHtml(emote) {
+function getEmoteHtml(emote, deferAnimation) {
     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
     emote['position_string'] = position_string;
     var emoteCode;
-    if (apngSupported || !emote.apng_url) {
+    if (apngSupported || !emote.apng_url || deferAnimation) {
         emoteCode =
             ['<span class="berryemote',
                 emote.height > maxEmoteHeight ? ' resize' : '',
+                apngSupported == false && emote.apng_url ? ' canvasapng' : '',
                 '" ',
                 'style="',
                 'background-image: url(', emote['background-image'], '); ',
                 'height:', emote.height, 'px; ',
                 'width:', emote.width, 'px; ',
                 'background-position:', position_string, '; ',
-                'display:inline-block;',
+                'display:inline-block; ',
+                'position: relative; overflow: hidden;',
                 '" title="', emote.names, ' from ', emote.sr, '" ',
                 'emote_id="', emote.id , '"></span>'
             ].join('');
@@ -60,21 +62,35 @@ function getEmoteHtml(emote) {
     return emoteCode;
 }
 
+function applyAnimation(emote, $emote) {
+    APNG.createAPNGCanvas(emote.apng_url, function (canvas) {
+        var position = (emote['background-position'] || ['0px', '0px']);
+        var $canvas = $(canvas);
+        $emote.append(canvas);
+        $canvas.css('position', 'absolute');
+        $canvas.css('left', position[0]);
+        $canvas.css('top', position[1]);
+    });
+}
 
-function postEmoteEffects(message) {
+function postEmoteEffects(message, deferAnimation) {
     if (!apngSupported) {
         var emotesToAnimate = message.find('.canvasapng');
         $.each(emotesToAnimate, function (i, emoteDom) {
             var $emote = $(emoteDom);
             var emote = berryEmotes[$emote.attr('emote_id')];
-            APNG.createAPNGCanvas(emote.apng_url, function (canvas) {
-                var position = (emote['background-position'] || ['0px', '0px']);
-                var $canvas = $(canvas);
-                $emote.append(canvas);
-                $canvas.css('position', 'absolute');
-                $canvas.css('left', position[0]);
-                $canvas.css('top', position[1]);
-            });
+
+            if (deferAnimation) {
+                $emote.hover(function(){
+                    $emote.css('background-image', '');
+                    applyAnimation(emote, $emote);
+                });
+                $emote.append('Hover to animate');
+                $emote.css('border', '1px solid black');
+
+            } else {
+                applyAnimation(emote, $emote);
+            }
         });
     }
 
@@ -160,7 +176,7 @@ function injectEmoteButton() {
         settingsMenu.click(function () {
             showBerrymoteSearch();
         });
-        $(window).keydown(function(event) {
+        $(window).keydown(function (event) {
             if (!(event.keyCode == 69 && event.ctrlKey)) return true;
             showBerrymoteSearch();
             event.preventDefault();
@@ -187,6 +203,7 @@ function waitToStart() {
 }
 
 var berryEmoteSearchTerm;
+var berryEmotePage = 0;
 function showBerrymoteSearch() {
     var searchWin = $("body").dialogWindow({
         title: "BerryEmote Search",
@@ -228,42 +245,47 @@ function showBerrymoteSearch() {
         var emote = berryEmotes[$emote.attr('emote_id')];
         chatInput.val([chatInput.val(), '[](/', emote.names[0], ')'].join(''));
         searchWin.parent('.dialogWindow').hide();
+        chatInput.focus();
     });
 
     searchWin.on('click', '.next_page, .prev_page', function (e) {
         var $button = $(e.currentTarget);
         if ($button.is('.next_page')) {
             if ((page === 0 && searchResults.length > pageSize) ||
-                (page > 0 && Math.floor((searchResults.length - (page * pageSize)) / pageSize ) > 0)) {
+                (page > 0 && Math.floor((searchResults.length - (page * pageSize)) / pageSize) > 0)) {
                 page++;
+                berryEmotePage = page;
             }
         }
         else if (page > 0) {
             page--;
+            berryEmotePage = page;
         }
         showSearchResults();
     });
 
     var showSearchResults = function () {
         var max = Math.min(pageSize, searchResults.length);
-        $results.html('');
+        $results.empty();
         var start = page * pageSize;
         var max = Math.min(start + pageSize, searchResults.length);
         for (var i = start; i < max; ++i) {
-            var emote = $('<span style="margin: 2px;" />').append(getEmoteHtml(berryEmotes[searchResults[i]]));
-            postEmoteEffects(emote);
+            var emote = $('<span style="margin: 2px;" />').append(getEmoteHtml(berryEmotes[searchResults[i]], true));
+            postEmoteEffects(emote, true);
             $results.append(emote);
         }
         $('.num_found').text('Found: ' + searchResults.length);
     };
 
-    var berryEmoteSearch = function () {
+    var berryEmoteSearch = function (startPage) {
         searchResults = [];
         var term = $searchBox.val();
         berryEmoteSearchTerm = term;
         if (!term) {
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
+                var emote = berryEmotes[i];
+                if (showNsfwEmotes === false && emote.nsfw) continue;
                 searchResults.push(i);
             }
         }
@@ -304,21 +326,24 @@ function showBerrymoteSearch() {
                 }
             }
         }
-        page = 0;
+        page = startPage;
         showSearchResults();
     };
 
     $searchBox.keyup(function (e) {
         clearTimeout(searchTimer);
         if (e.keyCode == 13) {
-            berryEmoteSearch();
+            berryEmoteSearch(0);
         }
-        else {
-            searchTimer = setTimeout(berryEmoteSearch, 250);
+        // don't search if they release control otherwise the shortcut loses your page#
+        else if (e.keyCode != 17) {
+            searchTimer = setTimeout(function () {
+                berryEmoteSearch(0);
+            }, 250);
         }
     });
 
-    berryEmoteSearch();
+    berryEmoteSearch(berryEmotePage);
 
     $('<span class="prev_page" style="cursor: pointer; text-decoration: underline;" />')
         .appendTo(searchWin)
