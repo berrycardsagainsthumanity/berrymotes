@@ -5,8 +5,10 @@ var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
-var berryEmoteMap = {};
+var berryEmoteMap;
 var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/g;
+var berryEmoteSearchTerm;
+var berryEmotePage = 0;
 
 function applyEmotesToStr(chatMessage) {
     var match;
@@ -81,7 +83,7 @@ function postEmoteEffects(message, deferAnimation) {
             var emote = berryEmotes[$emote.attr('emote_id')];
 
             if (deferAnimation) {
-                $emote.hover(function(){
+                $emote.hover(function () {
                     $emote.css('background-image', '');
                     applyAnimation(emote, $emote);
                 });
@@ -157,6 +159,7 @@ function monkeyPatchPoll() {
 }
 
 function buildEmoteMap() {
+    berryEmoteMap = {};
     var max = berryEmotes.length;
     for (var i = 0; i < max; ++i) {
         var berryemote = berryEmotes[i];
@@ -177,10 +180,18 @@ function injectEmoteButton() {
             showBerrymoteSearch();
         });
         $(window).keydown(function (event) {
-            if (!(event.keyCode == 69 && event.ctrlKey)) return true;
-            showBerrymoteSearch();
-            event.preventDefault();
-            return false;
+            if ((event.keyCode == 69 && event.ctrlKey) ||
+                event.keyCode == 27) {
+                if($('.berrymotes_search_results').length){
+                    $('.dialogWindow').remove();
+                }
+                else{
+                    showBerrymoteSearch();
+                }
+                event.preventDefault();
+                return false;
+            }
+            return true;
         });
         if (berryEmotesDebug) console.log('Settings button injected: ', settingsMenu);
     });
@@ -202,8 +213,6 @@ function waitToStart() {
     }
 }
 
-var berryEmoteSearchTerm;
-var berryEmotePage = 0;
 function showBerrymoteSearch() {
     var searchWin = $("body").dialogWindow({
         title: "BerryEmote Search",
@@ -244,7 +253,7 @@ function showBerrymoteSearch() {
         var $emote = $(e.currentTarget);
         var emote = berryEmotes[$emote.attr('emote_id')];
         chatInput.val([chatInput.val(), '[](/', emote.names[0], ')'].join(''));
-        searchWin.parent('.dialogWindow').hide();
+        searchWin.parent('.dialogWindow').remove();
         chatInput.focus();
     });
 
@@ -395,6 +404,14 @@ function showBerrymoteConfig() {
         localStorage.setItem('maxEmoteHeight', maxHeight.val());
     });
     $('<span/>').text("pixels.").appendTo(row);
+//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    var refresh = $('<button>Refresh Data</button>').appendTo(row);
+    refresh.click(function () {
+        $.getScript('http://backstage.berrytube.tv/marminator/berrymotes_data.js', function () {
+            buildEmoteMap();
+        });
+    });
 //----------------------------------------
 
     settWin.window.center();
