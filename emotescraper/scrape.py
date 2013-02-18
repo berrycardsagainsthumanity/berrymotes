@@ -25,7 +25,7 @@ http_conn = opener.open(req, urllib.urlencode(formdata))
 http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
-emote_regex = re.compile('a\[href\|?="/([\w]+)')
+emote_regex = re.compile('a\[href[|^]?="/([\w]+)')
 folder_regex = re.compile('http://(.)')
 
 for subreddit in subreddits:
