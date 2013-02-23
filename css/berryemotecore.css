@@ -1,0 +1,22 @@
+.berryemote_hover>span{
+    display: none !important;
+}
+
+.berryemote_hover .berryemote_placeholder{
+    display:inline-block !important;
+    background-color: lightcyan;
+    color: black;
+}
+
+.berryemote_hover:hover>.berryemote-wrapper-outer,
+.berryemote_hover:hover>.berryemote{
+    background-color: rgba(0, 0, 0, 0.6);
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: inline-block !important;
+    position: absolute !important;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+}
