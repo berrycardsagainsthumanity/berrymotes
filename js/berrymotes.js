@@ -1,5 +1,6 @@
 var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
 var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') === "true";
+var berryDrunkMode = localStorage.getItem('berryDrunkMode') === "true";
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
@@ -181,11 +182,12 @@ function injectEmoteButton() {
         });
         $(window).keydown(function (event) {
             if ((event.keyCode == 69 && event.ctrlKey) ||
+                (berryDrunkMode && event.ctrlKey && (event.keyCode == 87 || event.keyCode == 82)) ||
                 (event.keyCode == 27 && $('.berrymotes_search_results').length)) {
-                if($('.berrymotes_search_results').length){
+                if ($('.berrymotes_search_results').length) {
                     $('.dialogWindow').remove();
                 }
-                else{
+                else {
                     showBerrymoteSearch();
                 }
                 event.preventDefault();
@@ -193,6 +195,14 @@ function injectEmoteButton() {
             }
             return true;
         });
+        window.onbeforeunload = function () {
+            if (berryDrunkMode) {
+                return "Are you sure you want to navigate away?";
+            }
+            // not in drunk mode, just let it happen.
+            return null;
+        };
+
         if (berryEmotesDebug) console.log('Settings button injected: ', settingsMenu);
     });
 }
@@ -392,6 +402,16 @@ function showBerrymoteConfig() {
         var enabled = $(this).is(":checked");
         showNsfwEmotes = enabled;
         localStorage.setItem('showNsfwEmotes', enabled);
+    });
+//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Drunk mode (prevents accidental navigation): ").appendTo(row);
+    var drunkMode = $('<input/>').attr('type', 'checkbox').appendTo(row);
+    if (berryDrunkMode) drunkMode.attr('checked', 'checked');
+    drunkMode.change(function () {
+        var enabled = $(this).is(":checked");
+        berryDrunkMode = enabled;
+        localStorage.setItem('berryDrunkMode', enabled);
     });
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
