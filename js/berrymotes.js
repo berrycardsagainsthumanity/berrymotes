@@ -7,8 +7,9 @@ var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
+var btLoggingIn = false;
 var berryEmoteMap;
-var emoteRegex = /\[\]\(\/([\w:!#\/]+)[-\w]*\)/gi;
+var emoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w]*)([^)]*)\)/gi;
 var berryEmoteSearchTerm;
 var berryEmotePage = 0;
 
@@ -25,8 +26,8 @@ function applyEmotesToStr(chatMessage) {
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1] , ')[-\\w]*\\)'].join(''), 'gi');
-            chatMessage = chatMessage.replace(replace_regex, emote_code);
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], ')([-\\w]*)([^)]*)\\)'].join(''), 'gi');
+            chatMessage = chatMessage.replace(replace_regex, emote_code + '$3');
         }
     }
     return chatMessage;
@@ -123,12 +124,12 @@ function postEmoteEffects(message, isSearch) {
 
     if (berryOnlyHover && !isSearch) {
         var emotesToHover = message.find('.berryemote_hover');
-        $.each(emotesToHover, function (i, emoteDom) {
+        $.each(emotesToHover, function (index, emoteDom) {
             var $emote = $(emoteDom);
             var emote = berryEmotes[$emote.attr('emote_id')];
             var emoteName = "";
-            for(var i = 0; i < emote.names.length; ++i){
-                if(emote.names[i].length > emoteName.length){
+            for (var i = 0; i < emote.names.length; ++i) {
+                if (emote.names[i].length > emoteName.length) {
                     emoteName = emote.names[i];
                 }
             }
@@ -175,17 +176,81 @@ function monkeyPatchPoll() {
     newPoll = function (data) {
         oldPoll(data);
         var poll = $('.poll.active');
-        var options = poll.find('div.label');
+        var options = poll.find('div.label, .title');
         $.each(options, function (i, option) {
             var $option = $(option);
             if (berryEmotesDebug) console.log(option);
             var t = $option.text().replace(">", "&gt;").replace("<", "&lt;");
+            t = t.replace(/\\\\([\w-]+)/i, '[](/$1)');
             t = applyEmotesToStr(t);
             $option.html(t);
             $option.css('position', 'relative');
             postEmoteEffects($option);
         });
+
     }
+}
+
+function monkeyPatchTabComplete() {
+    var oldTabComplete = tabComplete;
+    tabComplete = function (elem) {
+        var chat = elem.val();
+        var ts = elem.data('tabcycle');
+        var i = elem.data('tabindex');
+        var hasTS = false;
+
+        if (typeof ts != "undefined" && ts != false) hasTS = true;
+
+        if (hasTS == false) {
+            console.log("New Tab");
+            var endword = /\\\\([^ ]+)$/i;
+            var m = chat.match(endword);
+            if (m) {
+                var emoteToComplete = m[1];
+                if (berryEmotesDebug) console.log('Found emote to tab complete: ', emoteToComplete)
+            } else {
+                return oldTabComplete(elem);
+            }
+
+            var re = new RegExp('^' + emoteToComplete + '.*', 'i');
+
+            var ret = [];
+            for (var i in berryEmoteMap) {
+                if (!showNsfwEmotes && berryEmotes[berryEmoteMap[i]].nsfw) continue;
+                var m = i.match(re);
+                if (m) ret.push(m[0]);
+            }
+            ret.sort();
+
+            if (ret.length == 1) {
+                var x = chat.replace(endword, '\\\\' + ret[0]) + ' ';
+                x += " ";
+                elem.val(x);
+            }
+            if (ret.length > 1) {
+                var ts = [];
+                for (var i in ret) {
+                    var x = chat.replace(endword, '\\\\' + ret[i]) + ' ';
+                    ts.push(x);
+                }
+                elem.data('tabcycle', ts);
+                elem.data('tabindex', 0);
+                hasTS = true;
+                console.log(elem.data());
+            }
+        }
+
+        if (hasTS == true) {
+            console.log("Cycle");
+            var ts = elem.data('tabcycle');
+            var i = elem.data('tabindex');
+            elem.val(ts[i]);
+            if (++i >= ts.length) i = 0;
+            elem.data('tabindex', i);
+        }
+
+        return ret
+    };
 }
 
 function buildEmoteMap() {
@@ -225,7 +290,7 @@ function injectEmoteButton() {
             return true;
         });
         window.onbeforeunload = function () {
-            if (berryDrunkMode) {
+            if (berryDrunkMode && !btLoggingIn) {
                 return "Are you sure you want to navigate away?";
             }
             // not in drunk mode, just let it happen.
@@ -249,7 +314,11 @@ function waitToStart() {
         buildEmoteMap();
         monkeyPatchChat();
         monkeyPatchPoll();
+        monkeyPatchTabComplete();
         injectEmoteButton();
+        $('form').submit(function(){
+            btLoggingIn = true;
+        });
     }
 }
 
