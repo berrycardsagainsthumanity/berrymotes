@@ -142,6 +142,6 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
         else:
             print "Didn't find an apng: " + image_url
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
-emote_data_file.write("var berryEmotes = {};".format(dumps(emotes)))
+emote_data_file.write(''.join(["var berryEmotes=", dumps(emotes, separators=(',',':')), ";"]))
 emote_data_file.close()
 
