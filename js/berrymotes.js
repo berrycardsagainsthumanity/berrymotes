@@ -1,4 +1,5 @@
 var berryEmotesEnabled = localStorage.getItem('berryEmotesEnabled') !== "false";
+var berryEmotesEffects = localStorage.getItem('berryEmotesEffects') !== "false";
 var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') === "true";
 var berryDrunkMode = localStorage.getItem('berryDrunkMode') === "true";
 var berryOnlyHover = localStorage.getItem('berryOnlyHover') === "true";
@@ -9,9 +10,20 @@ var apngSupported = localStorage.getItem('apngSupported');
 if (apngSupported === "false") apngSupported = false;
 var btLoggingIn = false;
 var berryEmoteMap;
-var emoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w]*)([^)]*)\)/gi;
+var berryEmoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
 var berryEmoteSearchTerm;
 var berryEmotePage = 0;
+var berryEmoteSpinAnimations = ['spin', 'zspin', 'xspin', 'yspin', '!spin', '!zspin', '!xspin', '!yspin'];
+var berryEmoteAnimationSpeeds = ['slowest', 'slower', 'slow', 'fast', 'faster', 'fastest'];
+var berryEmoteAnimationSpeedMap = {
+    'slowest': '14s',
+    'slower': '12s',
+    'slow': '10s',
+    'fast': '6s',
+    'faster': '4s',
+    'fastest': '2s'
+};
+
 
 function marmReactiveMode() {
     $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.css" />');
@@ -19,21 +31,21 @@ function marmReactiveMode() {
 
 function applyEmotesToStr(chatMessage) {
     var match;
-    while (match = emoteRegex.exec(chatMessage)) {
+    while (match = berryEmoteRegex.exec(chatMessage)) {
         var emote_id = berryEmoteMap[match[1]];
         if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
             if (showNsfwEmotes === false && emote.nsfw) continue;
-            var emote_code = getEmoteHtml(emote);
+            var emote_code = getEmoteHtml(emote, false, match[2]);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], ')([-\\w]*)([^)]*)\\)'].join(''), 'gi');
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], ')([-\\w!]*)([^)]*)\\)'].join(''), 'gi');
             chatMessage = chatMessage.replace(replace_regex, emote_code + '$3');
         }
     }
     return chatMessage;
 }
 
-function getEmoteHtml(emote, isSearch) {
+function getEmoteHtml(emote, isSearch, flags) {
     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
     emote['position_string'] = position_string;
     var emoteCode;
@@ -52,6 +64,7 @@ function getEmoteHtml(emote, isSearch) {
                 'display:inline-block; ',
                 'position: relative; overflow: hidden;',
                 '" title="', emote.names, ' from ', emote.sr, '" ',
+                'flags="', flags, '" ',
                 'emote_id="', emote.id , '"></span>'
             ].join('');
     }
@@ -67,6 +80,7 @@ function getEmoteHtml(emote, isSearch) {
                 'display:inline-block; ',
                 'position: relative; overflow: hidden;',
                 '" title="', emote.names, ' from ', emote.sr, '" ',
+                'flags="', flags, '" ',
                 'emote_id="', emote.id , '"></span>'
             ].join('');
     }
@@ -142,10 +156,70 @@ function postEmoteEffects(message, isSearch) {
                 , '</span>'].join(''));
         });
     }
+    if (!isSearch && berryEmotesEffects) {
+        var emotes = message.find('.berryemote');
+        $.each(emotes, function (index, emoteDom) {
+            var $emote = $(emoteDom);
+            var emote = berryEmotes[$emote.attr('emote_id')];
+            var flags = $emote.attr('flags').split('-');
+            $emote.removeAttr('flags');
+
+            var grandParent = $emote.parents('.berryemote-wrapper-outer');
+            $emote = grandParent.is('.berryemote-wrapper-outer') ? grandParent : $emote;
+            var animations = [];
+
+            var speed;
+            var reverse;
+            for (var i = 0; i < flags.length; ++i) {
+                if (berryEmoteAnimationSpeeds.indexOf(flags[i]) > -1 || flags[i].match(/^s\d/)) {
+                    speed = flags[i];
+                }
+                if (flags[i] == 'r') {
+                    reverse = true;
+                }
+            }
+            for (var i = 0; i < flags.length; ++i) {
+                if (berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
+                    animations.push(flags[i] + ' 2s infinite linear');
+                }
+                if (flags[i] == 'slide' || flags[i] == '!slide') {
+                    var slideSpeed = '8s';
+                    if (speed) {
+                        if (speed.match(/^s\d/)) {
+                            slideSpeed = speed.replace('s', '') + 's';
+                        }
+                        else {
+                            slideSpeed = berryEmoteAnimationSpeedMap[speed];
+                            if (!slideSpeed) slideSpeed = '8s';
+                        }
+                    }
+                    if (flags[i] == 'slide' && reverse)
+                        animations.push(['!slide', slideSpeed, 'infinite ease'].join(' '));
+                    else
+                        animations.push([flags[i], slideSpeed, 'infinite ease'].join(' '));
+                }
+                if (flags[i].match(/^\d+$/)) {
+                    $emote.css('transform', 'rotate(' + flags[i] + 'deg)');
+                }
+                if(flags[i].match(/^x\d+$/)){
+                    var shift = +flags[i].replace('x', '');
+                    shift = shift > 150 || shift < -150 ? 0 : shift;
+                    $emote.css('left', shift + 'px');
+                }
+                if(flags[i].match(/^z\d+$/)){
+                    var zindex = +flags[i].replace('z', '');
+                    zindex = zindex > 10 ? 0 : zindex;
+                    $emote.css('z-index', zindex);
+                }
+            }
+            $emote.css('animation', animations.join(',').replace('!', '-'));
+            if (reverse) $emote.css('transform', 'scaleX(-1)');
+        });
+    }
 }
 
 function applyEmotesToChat(chatMessage) {
-    if (berryEmotesEnabled && chatMessage.match(emoteRegex)) {
+    if (berryEmotesEnabled && chatMessage.match(berryEmoteRegex)) {
         chatMessage = applyEmotesToStr(chatMessage);
         chatMessage = $('<span style="position: relative;"></span>').append(chatMessage);
         postEmoteEffects(chatMessage);
@@ -310,13 +384,20 @@ function waitToStart() {
     }
     else {
         if (berryEmotesDebug) console.log('starting');
-        $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/berryemotecore.css" />');
+        if (berryEmotesDebug) {
+            $("head").append('<link rel="stylesheet" type="text/css" ' +
+                'href="http://backstage.berrytube.tv/marminator/berryemotecore.staging.css" />');
+        }
+        else {
+            $("head").append('<link rel="stylesheet" type="text/css" ' +
+                'href="http://backstage.berrytube.tv/marminator/berryemotecore.css" />');
+        }
         buildEmoteMap();
         monkeyPatchChat();
         monkeyPatchPoll();
         monkeyPatchTabComplete();
         injectEmoteButton();
-        $('form').submit(function(){
+        $('form').submit(function () {
             btLoggingIn = true;
         });
     }
@@ -521,6 +602,16 @@ function showBerrymoteConfig() {
         var enabled = $(this).is(":checked");
         berryOnlyHover = enabled;
         localStorage.setItem('berryOnlyHover', enabled);
+    });
+//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Enable extra effects: ").appendTo(row);
+    var effects = $('<input/>').attr('type', 'checkbox').appendTo(row);
+    if (berryEmotesEffects) effects.attr('checked', 'checked');
+    effects.change(function () {
+        var enabled = $(this).is(":checked");
+        berryEmotesEffects = enabled;
+        localStorage.setItem('berryEmotesEffects', enabled);
     });
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);

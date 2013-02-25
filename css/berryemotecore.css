@@ -1,15 +1,15 @@
-.berryemote_hover>span{
+.berryemote_hover>span {
     display: none !important;
 }
 
-.berryemote_hover .berryemote_placeholder{
-    display:inline-block !important;
+.berryemote_hover .berryemote_placeholder {
+    display: inline-block !important;
     background-color: lightcyan;
     color: black;
 }
 
 .berryemote_hover:hover>.berryemote-wrapper-outer,
-.berryemote_hover:hover>.berryemote{
+.berryemote_hover:hover>.berryemote {
     background-color: rgba(0, 0, 0, 0.6);
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -20,3 +20,242 @@
     left: 0;
     z-index: 10;
 }
+
+
+@-webkit-keyframes spin {
+    from {
+        -webkit-transform: rotate(0deg) rotateX(0deg) rotateY(0deg);
+    }
+    to {
+        -webkit-transform: rotate(359deg) rotateX(359deg) rotateY(359deg);
+    }
+}
+
+@-webkit-keyframes zspin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(359deg);
+    }
+}
+
+@-webkit-keyframes xspin {
+    from {
+        -webkit-transform: rotateX(0deg);
+    }
+    to {
+        -webkit-transform: rotateX(359deg);
+    }
+}
+
+@-webkit-keyframes yspin {
+    from {
+        -webkit-transform: rotateY(0deg);
+    }
+    to {
+        -webkit-transform: rotateY(359deg);
+    }
+}
+
+@-webkit-keyframes -spin {
+    to {
+        -webkit-transform: rotate(0deg) rotateX(0deg) rotateY(0deg);
+    }
+    from {
+        -webkit-transform: rotate(359deg) rotateX(359deg) rotateY(359deg);
+    }
+}
+
+@-webkit-keyframes -zspin {
+    to {
+        -webkit-transform: rotate(0deg);
+    }
+    from {
+        -webkit-transform: rotate(359deg);
+    }
+}
+
+@-webkit-keyframes -xspin {
+    to {
+        -webkit-transform: rotateX(0deg);
+    }
+    from {
+        -webkit-transform: rotateX(359deg);
+    }
+}
+
+@-webkit-keyframes -yspin {
+    to {
+        -webkit-transform: rotateY(0deg);
+    }
+    from {
+        -webkit-transform: rotateY(359deg);
+    }
+}
+
+@-webkit-keyframes slide {
+    0% {
+        left: 0;
+        -webkit-transform: scaleX(1)
+    }
+    45% {
+        left: 50%;
+        -webkit-transform: scaleX(1)
+    }
+    50% {
+        left: 50%;
+        -webkit-transform: scaleX(-1)
+    }
+    95% {
+        left: 0;
+        -webkit-transform: scaleX(-1)
+    }
+    100% {
+        left: 0;
+        -webkit-transform: scaleX(1)
+    }
+}
+
+@-webkit-keyframes -slide {
+    0% {
+        left: 0;
+        -webkit-transform: scaleX(-1)
+    }
+    45% {
+        left: 50%;
+        -webkit-transform: scaleX(-1)
+    }
+    50% {
+        left: 50%;
+        -webkit-transform: scaleX(1)
+    }
+    95% {
+        left: 0;
+        -webkit-transform: scaleX(1)
+    }
+    100% {
+        left: 0;
+        -webkit-transform: scaleX(-1)
+    }
+}
+/*no prefixed versions*/
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg) rotateX(0deg) rotateY(0deg);
+    }
+    to {
+        transform: rotate(359deg) rotateX(359deg) rotateY(359deg);
+    }
+}
+
+@keyframes zspin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes xspin {
+    from {
+        transform: rotateX(0deg);
+    }
+    to {
+        transform: rotateX(359deg);
+    }
+}
+
+@keyframes yspin {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(359deg);
+    }
+}
+
+@keyframes -spin {
+    to {
+        transform: rotate(0deg) rotateX(0deg) rotateY(0deg);
+    }
+    from {
+        transform: rotate(359deg) rotateX(359deg) rotateY(359deg);
+    }
+}
+
+@keyframes -zspin {
+    to {
+        transform: rotate(0deg);
+    }
+    from {
+        transform: rotate(359deg);
+    }
+}
+
+@keyframes -xspin {
+    to {
+        transform: rotateX(0deg);
+    }
+    from {
+        transform: rotateX(359deg);
+    }
+}
+
+@keyframes -yspin {
+    to {
+        transform: rotateY(0deg);
+    }
+    from {
+        transform: rotateY(359deg);
+    }
+}
+
+@keyframes slide {
+    0% {
+        left: 0;
+        transform: scaleX(1)
+    }
+    45% {
+        left: 50%;
+        transform: scaleX(1)
+    }
+    50% {
+        left: 50%;
+        transform: scaleX(-1)
+    }
+    95% {
+        left: 0;
+        transform: scaleX(-1)
+    }
+    100% {
+        left: 0;
+        transform: scaleX(1)
+    }
+}
+
+@keyframes -slide {
+    0% {
+        left: 0;
+        transform: scaleX(-1)
+    }
+    45% {
+        left: 50%;
+        transform: scaleX(-1)
+    }
+    50% {
+        left: 50%;
+        transform: scaleX(1)
+    }
+    95% {
+        left: 0;
+        transform: scaleX(1)
+    }
+    100% {
+        left: 0;
+        transform: scaleX(-1)
+    }
+}
+
