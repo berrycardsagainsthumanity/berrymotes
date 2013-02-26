@@ -201,12 +201,18 @@ function postEmoteEffects(message, isSearch) {
                 if (flags[i].match(/^\d+$/)) {
                     $emote.css('transform', 'rotate(' + flags[i] + 'deg)');
                 }
-                if(flags[i].match(/^x\d+$/)){
+                if (flags[i].match(/^x\d+$/)) {
                     var shift = +flags[i].replace('x', '');
-                    shift = shift > 150 || shift < -150 ? 0 : shift;
+                    shift = shift > 150 ? 0 : shift;
                     $emote.css('left', shift + 'px');
                 }
-                if(flags[i].match(/^z\d+$/)){
+                if (flags[i].match(/^!x\d+$/)) {
+                    var shift = +flags[i].replace('!x', '');
+                    shift = shift * -1;
+                    shift = shift < -150 ? 0 : shift;
+                    $emote.css('left', shift + 'px');
+                }
+                if (flags[i].match(/^z\d+$/)) {
                     var zindex = +flags[i].replace('z', '');
                     zindex = zindex > 10 ? 0 : zindex;
                     $emote.css('z-index', zindex);
