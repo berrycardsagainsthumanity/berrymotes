@@ -4,6 +4,7 @@ var showNsfwEmotes = localStorage.getItem('showNsfwEmotes') === "true";
 var berryDrunkMode = localStorage.getItem('berryDrunkMode') === "true";
 var berryOnlyHover = localStorage.getItem('berryOnlyHover') === "true";
 var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
+var berryEmoteEffectTTL = +localStorage.getItem('berryEmoteEffectTTL') || 20;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
 // Leaving as none so we can test for it later on.
@@ -13,6 +14,7 @@ var berryEmoteMap;
 var berryEmoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
 var berryEmoteSearchTerm;
 var berryEmotePage = 0;
+var berryEmoteEffectStack = [];
 var berryEmoteSpinAnimations = ['spin', 'zspin', 'xspin', 'yspin', '!spin', '!zspin', '!xspin', '!yspin'];
 var berryEmoteAnimationSpeeds = ['slowest', 'slower', 'slow', 'fast', 'faster', 'fastest'];
 var berryEmoteAnimationSpeedMap = {
@@ -218,6 +220,9 @@ function postEmoteEffects(message, isSearch) {
                     $emote.css('z-index', zindex);
                 }
             }
+            if(animations.length > 0){
+                berryEmoteEffectStack.push({"ttl": berryEmoteEffectTTL, "$emote": $emote});
+            }
             $emote.css('animation', animations.join(',').replace('!', '-'));
             if (reverse) $emote.css('transform', 'scaleX(-1)');
         });
@@ -247,6 +252,17 @@ function monkeyPatchChat() {
         var h = $('<span/>').html(msg);
         var re = new RegExp("^>");
         if (h.text().match(re)) h.addClass("green");
+        berryEmoteEffectStack = $.grep(berryEmoteEffectStack, function (effectEmote, i) {
+            effectEmote["ttl"] -= 1;
+            if(effectEmote["ttl"] >= 0) {
+                return true; // keep the element in the array
+            }
+            else {
+                effectEmote["$emote"].css("animation", "none");
+                return false;
+            }
+        });
+        
         return h;
     };
 }
@@ -621,7 +637,7 @@ function showBerrymoteConfig() {
     });
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
-    $('<span/>').text("Max Height: ").appendTo(row);
+    $('<span/>').text("Max Height:").appendTo(row);
     var maxHeight = $('<input/>').attr('type', 'text').val(maxEmoteHeight).addClass("small").appendTo(row);
     maxHeight.css('text-align', 'center');
     maxHeight.css('width', '30px');
@@ -630,6 +646,16 @@ function showBerrymoteConfig() {
         localStorage.setItem('maxEmoteHeight', maxHeight.val());
     });
     $('<span/>').text("pixels.").appendTo(row);
+//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Max chat lines to keep effects running on (saves CPU):").appendTo(row);
+    var chatTTL = $('<input/>').attr('type', 'text').val(berryEmoteEffectTTL).addClass("small").appendTo(row);
+    chatTTL.css('text-align', 'center');
+    chatTTL.css('width', '30px');
+    chatTTL.keyup(function () {
+        berryEmoteEffectTTL = chatTTL.val();
+        localStorage.setItem('berryEmoteEffectTTL', chatTTL.val());
+    });
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     var refresh = $('<button>Refresh Data</button>').appendTo(row);
