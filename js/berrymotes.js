@@ -319,14 +319,13 @@ function monkeyPatchTabComplete() {
             ret.sort();
 
             if (ret.length == 1) {
-                var x = chat.replace(endword, '\\\\' + ret[0]) + ' ';
-                x += " ";
+                var x = chat.replace(endword, '\\\\' + ret[0]);
                 elem.val(x);
             }
             if (ret.length > 1) {
                 var ts = [];
                 for (var i in ret) {
-                    var x = chat.replace(endword, '\\\\' + ret[i]) + ' ';
+                    var x = chat.replace(endword, '\\\\' + ret[i]);
                     ts.push(x);
                 }
                 elem.data('tabcycle', ts);
