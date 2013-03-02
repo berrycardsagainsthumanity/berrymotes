@@ -705,6 +705,7 @@ checked_images = [
 
 subreddits = [
     "marmemotes",
+    "jericksvector",
     "mylittlepony",
     "adviceponies",
     "ainbowdash",
