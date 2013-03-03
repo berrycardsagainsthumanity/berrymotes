@@ -75,6 +75,15 @@ function marmReactiveMode() {
             showPollpane();
         });
     });
+    
+    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        $("head").append('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>');
+    }
+    whenExists('#chatControls', function () {
+        if(NAME){
+            $('#headbar').hide();
+        }
+    });
 }
 
 function applyEmotesToStr(chatMessage) {
