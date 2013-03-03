@@ -32,28 +32,7 @@ function marmReactiveMode() {
         $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.staging.css" />');
     else
         $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.css" />');
-    var playlist = $('#leftpane');
-    var playlistClose = $('<div class="close"></div>');
-    playlist.prepend(playlistClose);
-    playlistClose.click(function(){
-        playlist.hide();
-    });
     
-    var showPlaylist = function(){
-        playlist.show();
-    };
-    
-    whenExists('#chatControls', function () {
-        if (berryEmotesDebug) console.log('Injecting playlist button.');
-        var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Playlist");
-        menu.css('margin-right', '2px');
-        menu.css('background', 'none');
-        menu.click(function () {
-            showPlaylist();
-            smartRefreshScrollbar();
-        });
-    });
-        
     var pollpane = $('#pollpane');
     $('#pollControl').appendTo(pollpane);
     var pollClose = $('<div class="close"></div>');
@@ -73,6 +52,35 @@ function marmReactiveMode() {
         menu.css('background', 'none');
         menu.click(function () {
             showPollpane();
+        });
+    });
+    
+    var playlist = $('#leftpane');
+    var playlistClose = $('<div class="close"></div>');
+    playlist.prepend(playlistClose);
+    playlistClose.click(function(){
+        playlist.hide();
+    });
+    
+    var showPlaylist = function(){
+        playlist.show();
+    };
+    
+    whenExists('#chatControls', function () {
+        if (berryEmotesDebug) console.log('Injecting playlist button.');
+        var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Playlist");
+        menu.css('margin-right', '2px');
+        menu.css('background', 'none');
+        menu.click(function () {
+            showPlaylist();
+            smartRefreshScrollbar();
+            realignPosHelper();
+            if(getCookie("plFolAcVid") == "1"){
+                var x = ACTIVE.domobj.index();
+                x -= 2;
+                if(x < 0) x = 0;
+                scrollToPlEntry(x);
+            }
         });
     });
     
