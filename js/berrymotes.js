@@ -64,6 +64,9 @@ function marmReactiveMode() {
     
     var showPlaylist = function(){
         playlist.show();
+        if(TYPE > 0){
+            playlist.css('padding-top', '70px');
+        }
     };
     
     whenExists('#chatControls', function () {
