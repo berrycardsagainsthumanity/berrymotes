@@ -793,6 +793,7 @@ subreddits = [
     "seriouslyluna",
     "spaceclop",
     "speedingturtle",
+    "stalliongrad",
     "surprise",
     "tacoshy",
     "tbpimagedump",
