@@ -3,7 +3,8 @@ nsfw_subreddits = [
 ]
 
 image_blacklist = [
-    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png"
+    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
+    "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png"
 ]
 
 checked_images = [
@@ -1040,6 +1041,11 @@ emote_info = [
     {
         'sr': 'mylittlensfw',
         'name': 'vinylshake',
+        'nsfw': True
+    },
+    {
+        'sr': 'berrytubelounge',
+        'name': 'ponykoreaisbestkorea',
         'nsfw': True
     },
 ]
