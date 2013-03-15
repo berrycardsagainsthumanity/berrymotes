@@ -174,13 +174,13 @@ function postEmoteEffects(message, isSearch, username) {
 
             if (isSearch) {
                 $emote.hover(function () {
-                    $emote.css('background-image', '');
-                    applyAnimation(emote, $emote);
+                    var $this = $(this);
+                    $this.css('background-image', '');
+                    applyAnimation(emote, $this);
                 });
                 $emote.append('Hover to animate');
                 $emote.css('border', '1px solid black');
                 $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
-
             } else {
                 applyAnimation(emote, $emote);
             }
