@@ -782,6 +782,7 @@ subreddits = [
     "mylittlewelcomewagon",
     "mylittlewtf",
     "octavia",
+    "onetrueprincess",
     "pankakke",
     "pinkiepie",
     "ploungemafia",
