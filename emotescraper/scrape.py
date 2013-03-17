@@ -49,7 +49,8 @@ for subreddit in subreddits:
         continue
     print "Subreddit:{}".format(subreddit)
     emotes_staging = defaultdict(dict)
-
+    if not stylesheet:
+        continue
     for rule in stylesheet.rules:
         if emote_regex.match(rule.selector.as_css()):
             for match in emote_regex.finditer(rule.selector.as_css()):
