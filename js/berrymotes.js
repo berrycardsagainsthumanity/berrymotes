@@ -285,6 +285,9 @@ function postEmoteEffects(message, isSearch) {
                     zindex = zindex > 10 ? 0 : zindex;
                     $emote.css('z-index', zindex);
                 }
+				if (flags[i] == 'vibrate' || flags[i] == 'chargin' || flags[i] == 'v') {
+					animations.push('vibrate 0.05s infinite linear');
+				}
             }
             if(animations.length > 0){
                 berryEmoteEffectStack.push({"ttl": berryEmoteEffectTTL, "$emote": $emote});

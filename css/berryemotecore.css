@@ -139,6 +139,23 @@
         -webkit-transform: scaleX(-1)
     }
 }
+
+@-webkit-keyframes vibrate {
+	0%  {
+		top: -1px;
+		left:-1px;
+		}
+	25%  {
+			top: -1px;left:1px;
+		}
+	50%  {
+			top: 1px;left:1px;
+		}
+	100% {
+			top: 1px;left:-1px;
+		}
+}
+
 /*no prefixed versions*/
 
 @keyframes spin {
@@ -258,4 +275,21 @@
         transform: scaleX(-1)
     }
 }
+
+@keyframes vibrate {
+	0%  {
+		top: -1px;
+		left:-1px;
+		}
+	25%  {
+			top: -1px;left:1px;
+		}
+	50%  {
+			top: 1px;left:1px;
+		}
+	100% {
+			top: 1px;left:-1px;
+		}
+}
+
 
