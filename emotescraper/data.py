@@ -3,7 +3,8 @@ nsfw_subreddits = [
 ]
 
 image_blacklist = [
-    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png"
+    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
+    "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png"
 ]
 
 checked_images = [
@@ -715,6 +716,7 @@ subreddits = [
     "beautybrass",
     "berrytubelounge",
     "clopclop",
+    "cloudchasermotes",
     "cuttershy",
     "dashiemotes",
     "daylightemotes",
@@ -731,6 +733,8 @@ subreddits = [
     "minuette",
     "mlas1animotes",
     "mlas1emotes",
+    "mlas1emotes2",
+    "mlas1imagedump",
     "mlas1party",
     "mlhfis",
     "mlpdrawingschool",
@@ -781,6 +785,7 @@ subreddits = [
     "mylittlewelcomewagon",
     "mylittlewtf",
     "octavia",
+    "onetrueprincess",
     "pankakke",
     "pinkiepie",
     "ploungemafia",
@@ -792,6 +797,7 @@ subreddits = [
     "seriouslyluna",
     "spaceclop",
     "speedingturtle",
+    "stalliongrad",
     "surprise",
     "tacoshy",
     "tbpimagedump",
@@ -1040,6 +1046,11 @@ emote_info = [
     {
         'sr': 'mylittlensfw',
         'name': 'vinylshake',
+        'nsfw': True
+    },
+    {
+        'sr': 'berrytubelounge',
+        'name': 'ponykoreaisbestkorea',
         'nsfw': True
     },
 ]

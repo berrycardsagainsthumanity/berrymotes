@@ -28,23 +28,23 @@ var berryEmoteAnimationSpeedMap = {
 
 
 function marmReactiveMode() {
-    if(berryEmotesDebug)
+    if (berryEmotesDebug)
         $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.staging.css" />');
     else
         $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.css" />');
-    
+
     var pollpane = $('#pollpane');
     $('#pollControl').appendTo(pollpane);
     var pollClose = $('<div class="close"></div>');
     pollpane.prepend(pollClose);
-    pollClose.click(function(){
+    pollClose.click(function () {
         pollpane.hide();
     });
-    
-    var showPollpane = function(){
+
+    var showPollpane = function () {
         pollpane.show();
     };
-    
+
     whenExists('#chatControls', function () {
         if (berryEmotesDebug) console.log('Injecting poll button.');
         var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Poll");
@@ -54,21 +54,21 @@ function marmReactiveMode() {
             showPollpane();
         });
     });
-    
+
     var playlist = $('#leftpane');
     var playlistClose = $('<div class="close"></div>');
     playlist.prepend(playlistClose);
-    playlistClose.click(function(){
+    playlistClose.click(function () {
         playlist.hide();
     });
-    
-    var showPlaylist = function(){
+
+    var showPlaylist = function () {
         playlist.show();
-        if(TYPE > 0){
+        if (TYPE > 0) {
             playlist.css('padding-top', '70px');
         }
     };
-    
+
     whenExists('#chatControls', function () {
         if (berryEmotesDebug) console.log('Injecting playlist button.');
         var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Playlist");
@@ -78,20 +78,20 @@ function marmReactiveMode() {
             showPlaylist();
             smartRefreshScrollbar();
             realignPosHelper();
-            if(getCookie("plFolAcVid") == "1"){
+            if (getCookie("plFolAcVid") == "1") {
                 var x = ACTIVE.domobj.index();
                 x -= 2;
-                if(x < 0) x = 0;
+                if (x < 0) x = 0;
                 scrollToPlEntry(x);
             }
         });
     });
-    
-    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
         $("head").append('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>');
     }
     whenExists('#chatControls', function () {
-        if(NAME){
+        if (NAME) {
             $('#headbar').hide();
         }
     });
@@ -125,7 +125,6 @@ function getEmoteHtml(emote, isSearch, flags) {
                 berryOnlyHover == true ? ' berryemote_hover' : '',
                 '" ',
                 'style="',
-                'background-image: url(', emote['background-image'], '); ',
                 'height:', emote.height, 'px; ',
                 'width:', emote.width, 'px; ',
                 'background-position:', position_string, '; ',
@@ -166,7 +165,7 @@ function applyAnimation(emote, $emote) {
     });
 }
 
-function postEmoteEffects(message, isSearch) {
+function postEmoteEffects(message, isSearch, username) {
     if (!apngSupported) {
         var emotesToAnimate = message.find('.canvasapng');
         $.each(emotesToAnimate, function (i, emoteDom) {
@@ -175,12 +174,13 @@ function postEmoteEffects(message, isSearch) {
 
             if (isSearch) {
                 $emote.hover(function () {
-                    $emote.css('background-image', '');
-                    applyAnimation(emote, $emote);
+                    var $this = $(this);
+                    $this.css('background-image', '');
+                    applyAnimation(emote, $this);
                 });
                 $emote.append('Hover to animate');
                 $emote.css('border', '1px solid black');
-
+                $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
             } else {
                 applyAnimation(emote, $emote);
             }
@@ -224,13 +224,12 @@ function postEmoteEffects(message, isSearch) {
                 , '</span>'].join(''));
         });
     }
+    var emotes = message.find('.berryemote');
     if (!isSearch && berryEmotesEffects) {
-        var emotes = message.find('.berryemote');
         $.each(emotes, function (index, emoteDom) {
             var $emote = $(emoteDom);
             var emote = berryEmotes[$emote.attr('emote_id')];
             var flags = $emote.attr('flags').split('-');
-            $emote.removeAttr('flags');
 
             var grandParent = $emote.parents('.berryemote-wrapper-outer');
             $emote = grandParent.is('.berryemote-wrapper-outer') ? grandParent : $emote;
@@ -289,51 +288,56 @@ function postEmoteEffects(message, isSearch) {
 					animations.push('vibrate 0.05s infinite linear');
 				}
             }
-            if(animations.length > 0){
+            if (animations.length > 0) {
                 berryEmoteEffectStack.push({"ttl": berryEmoteEffectTTL, "$emote": $emote});
             }
             $emote.css('animation', animations.join(',').replace('!', '-'));
             if (reverse) $emote.css('transform', 'scaleX(-1)');
         });
     }
-}
-
-function applyEmotesToChat(chatMessage) {
-    if (berryEmotesEnabled && chatMessage.match(berryEmoteRegex)) {
-        chatMessage = applyEmotesToStr(chatMessage);
-        chatMessage = $('<span style="position: relative;"></span>').append(chatMessage);
-        postEmoteEffects(chatMessage);
-        return chatMessage;
-    }
-    else {
-        chatMessage = $('<span style="position: relative;"></span>').html(chatMessage);
-    }
-    var re = new RegExp("^>");
-    if (chatMessage.text().match(re)) chatMessage.addClass("green");
-    return chatMessage;
+    $.each(emotes, function (index, emoteDom) {
+        if (berryEmotesDebug) console.log('Adding bgimage to ', emoteDom);
+        var $emote = $(emoteDom);
+        var emote = berryEmotes[$emote.attr('emote_id')];
+        if ($emote.is('.canvasapng') == false) {
+            $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
+        }
+        if (username == "Marminator") {
+            var flags = $emote.attr('flags').split('-');
+            if (flags.indexOf('refresh') >= 0) {
+                var sleep = Math.random() * 30;
+                sleep = (sleep + 1) * 1000;
+                if (berryEmotesDebug) console.log('Got refresh, going in: ', sleep);
+                setTimeout(berryEmoteDataRefresh, sleep);
+            }
+        }
+        $emote.removeAttr('flags');
+    });
 }
 
 function monkeyPatchChat() {
-    formatChatMsg = function (msg) {
-        var regexp = new RegExp("(http[s]{0,1}://[^ ]*)", 'ig');
-        msg = msg.replace(regexp, '<a href="$&" target="_blank">$&</a>');
-        msg = applyEmotesToChat(msg);
-        var h = $('<span/>').html(msg);
-        var re = new RegExp("^>");
-        if (h.text().match(re)) h.addClass("green");
-        berryEmoteEffectStack = $.grep(berryEmoteEffectStack, function (effectEmote, i) {
-            effectEmote["ttl"] -= 1;
-            if(effectEmote["ttl"] >= 0) {
-                return true; // keep the element in the array
-            }
-            else {
-                effectEmote["$emote"].css("animation", "none");
-                return false;
-            }
-        });
-        
-        return h;
-    };
+    var oldAddChatMsg = addChatMsg;
+    addChatMsg = function (data, _to) {
+        var applyEmotes = berryEmotesEnabled && data.msg.msg.match(berryEmoteRegex);
+        if (applyEmotes) {
+            data.msg.msg = applyEmotesToStr(data.msg.msg);
+            berryEmoteEffectStack = $.grep(berryEmoteEffectStack, function (effectEmote, i) {
+                effectEmote["ttl"] -= 1;
+                if (effectEmote["ttl"] >= 0) {
+                    return true; // keep the element in the array
+                }
+                else {
+                    effectEmote["$emote"].css("animation", "none");
+                    return false;
+                }
+            });
+        }
+        oldAddChatMsg.apply(this, arguments);
+        if (applyEmotes) {
+            var chatMessage = $(_to).children(':last-child');
+            postEmoteEffects(chatMessage, false, data.msg.nick);
+        }
+    }
 }
 
 function monkeyPatchPoll() {
@@ -644,6 +648,11 @@ function showBerrymoteSearch() {
     searchWin.window.center();
 }
 
+function berryEmoteDataRefresh() {
+    $.getScript('http://backstage.berrytube.tv/marminator/berrymotes_data.js', function () {
+        buildEmoteMap();
+    });
+}
 function showBerrymoteConfig() {
     var row;
     var settWin = $("body").dialogWindow({
@@ -728,9 +737,7 @@ function showBerrymoteConfig() {
     row = $('<div/>').appendTo(configOps);
     var refresh = $('<button>Refresh Data</button>').appendTo(row);
     refresh.click(function () {
-        $.getScript('http://backstage.berrytube.tv/marminator/berrymotes_data.js', function () {
-            buildEmoteMap();
-        });
+        berryEmoteDataRefresh();
     });
 //----------------------------------------
 
