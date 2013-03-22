@@ -321,17 +321,17 @@ function monkeyPatchChat() {
         var applyEmotes = berryEmotesEnabled && data.msg.msg.match(berryEmoteRegex);
         if (applyEmotes) {
             data.msg.msg = applyEmotesToStr(data.msg.msg);
-            berryEmoteEffectStack = $.grep(berryEmoteEffectStack, function (effectEmote, i) {
-                effectEmote["ttl"] -= 1;
-                if (effectEmote["ttl"] >= 0) {
-                    return true; // keep the element in the array
-                }
-                else {
-                    effectEmote["$emote"].css("animation", "none");
-                    return false;
-                }
-            });
         }
+		berryEmoteEffectStack = $.grep(berryEmoteEffectStack, function (effectEmote, i) {
+			effectEmote["ttl"] -= 1;
+			if (effectEmote["ttl"] >= 0) {
+				return true; // keep the element in the array
+			}
+			else {
+				effectEmote["$emote"].css("animation", "none");
+				return false;
+			}
+		});
         oldAddChatMsg.apply(this, arguments);
         if (applyEmotes) {
             var chatMessage = $(_to).children(':last-child');
