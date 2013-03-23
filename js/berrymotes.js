@@ -7,6 +7,15 @@ var maxEmoteHeight = +localStorage.getItem('maxEmoteHeight') || 200;
 var berryEmoteEffectTTL = +localStorage.getItem('berryEmoteEffectTTL') || 20;
 var berryEmotesDebug = localStorage.getItem('berryEmotesDebug') === "true";
 var apngSupported = localStorage.getItem('apngSupported');
+
+var berryEnableSlide = localStorage.getItem('berryEnableSlide') !== "false";
+var berryEnableSpin = localStorage.getItem('berryEnableSpin') !== "false";
+var berryEnableVibrate = localStorage.getItem('berryEnableVibrate') !== "false";
+var berryEnableTranspose = localStorage.getItem('berryEnableTranspose') !== "false";
+var berryEnableReverse = localStorage.getItem('berryEnableReverse') !== "false";
+var berryEnableRotate = localStorage.getItem('berryEnableRotate') !== "false";
+var berryEmoteBlacklist = (localStorage.getItem('berryEmoteBlacklist') || '').split(',');
+
 // Leaving as none so we can test for it later on.
 if (apngSupported === "false") apngSupported = false;
 var btLoggingIn = false;
@@ -103,11 +112,19 @@ function applyEmotesToStr(chatMessage) {
         var emote_id = berryEmoteMap[match[1]];
         if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
+			var skip = false;
+			for(var i = 0; i < berryEmoteBlacklist.length; i++){
+				if(emote.names.indexOf($.trim(berryEmoteBlacklist[i])) > -1){
+					skip=true;
+				}
+			}
+			if(skip===true) continue;
+			
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote, false, match[2]);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], ')([-\\w!]*)([^)]*)\\)'].join(''), 'gi');
-            chatMessage = chatMessage.replace(replace_regex, emote_code + '$3');
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')([^)]*)\\)'].join(''), 'gi');
+            chatMessage = chatMessage.replace(replace_regex, emote_code + '$2');
         }
     }
     return chatMessage;
@@ -224,6 +241,7 @@ function postEmoteEffects(message, isSearch, username) {
                 , '</span>'].join(''));
         });
     }
+	
     var emotes = message.find('.berryemote');
     if (!isSearch && berryEmotesEffects) {
         $.each(emotes, function (index, emoteDom) {
@@ -246,10 +264,10 @@ function postEmoteEffects(message, isSearch, username) {
                 }
             }
             for (var i = 0; i < flags.length; ++i) {
-                if (berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
+                if (berryEnableSpin && berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
                     animations.push(flags[i] + ' 2s infinite linear');
                 }
-                if (flags[i] == 'slide' || flags[i] == '!slide') {
+                if (berryEnableSlide && (flags[i] == 'slide' || flags[i] == '!slide')) {
                     var slideSpeed = '8s';
                     if (speed) {
                         if (speed.match(/^s\d/)) {
@@ -265,26 +283,26 @@ function postEmoteEffects(message, isSearch, username) {
                     else
                         animations.push([flags[i], slideSpeed, 'infinite ease'].join(' '));
                 }
-                if (flags[i].match(/^\d+$/)) {
+                if (berryEnableRotate && flags[i].match(/^\d+$/)) {
                     $emote.css('transform', 'rotate(' + flags[i] + 'deg)');
                 }
-                if (flags[i].match(/^x\d+$/)) {
+                if (berryEnableTranspose && flags[i].match(/^x\d+$/)) {
                     var shift = +flags[i].replace('x', '');
                     shift = shift > 150 ? 0 : shift;
                     $emote.css('left', shift + 'px');
                 }
-                if (flags[i].match(/^!x\d+$/)) {
+                if (berryEnableTranspose && flags[i].match(/^!x\d+$/)) {
                     var shift = +flags[i].replace('!x', '');
                     shift = shift * -1;
                     shift = shift < -150 ? 0 : shift;
                     $emote.css('left', shift + 'px');
                 }
-                if (flags[i].match(/^z\d+$/)) {
+                if (berryEnableTranspose && flags[i].match(/^z\d+$/)) {
                     var zindex = +flags[i].replace('z', '');
                     zindex = zindex > 10 ? 0 : zindex;
                     $emote.css('z-index', zindex);
                 }
-				if (flags[i] == 'vibrate' || flags[i] == 'chargin' || flags[i] == 'v') {
+				if (berryEnableVibrate && (flags[i] == 'vibrate' || flags[i] == 'chargin' || flags[i] == 'v')) {
 					animations.push('vibrate 0.05s infinite linear');
 				}
             }
@@ -292,7 +310,7 @@ function postEmoteEffects(message, isSearch, username) {
                 berryEmoteEffectStack.push({"ttl": berryEmoteEffectTTL, "$emote": $emote});
             }
             $emote.css('animation', animations.join(',').replace('!', '-'));
-            if (reverse) $emote.css('transform', 'scaleX(-1)');
+            if (berryEnableReverse && reverse) $emote.css('transform', 'scaleX(-1)');
         });
     }
     $.each(emotes, function (index, emoteDom) {
@@ -712,6 +730,15 @@ function showBerrymoteConfig() {
         berryEmotesEffects = enabled;
         localStorage.setItem('berryEmotesEffects', enabled);
     });
+	effects = $('<div style="margin-left:10px; border: 1px solid black;"><div style="clear:both;"/></div>');
+	configOps.append(effects);
+//----------------------------------------
+	berryCreateOption(effects, "Slide Effect", 	"berryEnableSlide");
+	berryCreateOption(effects, "Spin Effect", 	"berryEnableSpin");
+	berryCreateOption(effects, "Vibrate Effect", 	"berryEnableVibrate");
+	berryCreateOption(effects, "Transpose (shift left and right) Effect", "berryEnableTranspose");
+	berryCreateOption(effects, "Reverse Effect", 	"berryEnableReverse");
+	berryCreateOption(effects, "Rotate Effect", 	"berryEnableRotate");
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     $('<span/>').text("Max Height:").appendTo(row);
@@ -735,6 +762,16 @@ function showBerrymoteConfig() {
     });
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Blacklist (emote names, comma separated)").appendTo(row);
+    var emoteBlacklist = $('<textarea/>').val(berryEmoteBlacklist).appendTo(row);
+    emoteBlacklist.css('text-align', 'center');
+    emoteBlacklist.css('width', '300px');
+    emoteBlacklist.keyup(function () {
+        berryEmoteBlacklist = emoteBlacklist.val().split(',');
+        localStorage.setItem('berryEmoteBlacklist', emoteBlacklist.val());
+    });
+//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
     var refresh = $('<button>Refresh Data</button>').appendTo(row);
     refresh.click(function () {
         berryEmoteDataRefresh();
@@ -742,6 +779,19 @@ function showBerrymoteConfig() {
 //----------------------------------------
 
     settWin.window.center();
+}
+
+function berryCreateOption(configOps, title, optionName){
+	//----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text(title).appendTo(row);
+    var chkBox = $('<input/>').attr('type', 'checkbox').appendTo(row);
+    if (this[optionName]) chkBox.attr('checked', 'checked');
+    chkBox.change(function () {
+        var enabled = $(this).is(":checked");
+		eval(optionName + " = " + enabled);
+        localStorage.setItem(optionName, enabled);
+    });
 }
 
 if (apngSupported === null) {
