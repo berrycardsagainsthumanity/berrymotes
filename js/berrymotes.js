@@ -123,7 +123,8 @@ function applyEmotesToStr(chatMessage) {
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote, false, match[2]);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')([^)]*)\\)'].join(''), 'gi');
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(',match[3] ,')\\)'].join(''), 'gi');
+			if (berryEmotesDebug) console.log('Replace regex: ', replace_regex);
             chatMessage = chatMessage.replace(replace_regex, emote_code + '$2');
         }
     }
@@ -252,6 +253,7 @@ function postEmoteEffects(message, isSearch, username) {
             var grandParent = $emote.parents('.berryemote-wrapper-outer');
             $emote = grandParent.is('.berryemote-wrapper-outer') ? grandParent : $emote;
             var animations = [];
+			var transforms = [];
 
             var speed;
             var reverse;
@@ -284,7 +286,7 @@ function postEmoteEffects(message, isSearch, username) {
                         animations.push([flags[i], slideSpeed, 'infinite ease'].join(' '));
                 }
                 if (berryEnableRotate && flags[i].match(/^\d+$/)) {
-                    $emote.css('transform', 'rotate(' + flags[i] + 'deg)');
+                    transforms.push('rotate(' + flags[i] + 'deg)');
                 }
                 if (berryEnableTranspose && flags[i].match(/^x\d+$/)) {
                     var shift = +flags[i].replace('x', '');
@@ -310,7 +312,10 @@ function postEmoteEffects(message, isSearch, username) {
                 berryEmoteEffectStack.push({"ttl": berryEmoteEffectTTL, "$emote": $emote});
             }
             $emote.css('animation', animations.join(',').replace('!', '-'));
-            if (berryEnableReverse && reverse) $emote.css('transform', 'scaleX(-1)');
+            if (berryEnableReverse && reverse) transforms.push('scaleX(-1)');
+			if(transforms.length > 0){
+				$emote.css('transform', transforms.join(' '));
+			}
         });
     }
     $.each(emotes, function (index, emoteDom) {
