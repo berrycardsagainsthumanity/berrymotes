@@ -376,7 +376,6 @@ function monkeyPatchPoll() {
             t = t.replace(/\\\\([\w-]+)/i, '[](/$1)');
             t = applyEmotesToStr(t);
             $option.html(t);
-            $option.css('position', 'relative');
             postEmoteEffects($option);
         });
 
