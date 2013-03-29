@@ -96,6 +96,13 @@ for subreddit in subreddits:
 if not os.path.exists('../images'):
     os.makedirs('../images')
 
+checked_images = []
+checked_images_file = open('checked_images.txt', 'rb')
+for line in checked_images_file:
+	checked_images.append(line.strip('\n'))
+checked_images_file.close()
+checked_images_file = open('checked_images.txt', 'a')
+	
 key_func = lambda e: e['background-image']
 for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
     file_name = image_url[image_url.rfind('/') + 1:]
@@ -141,6 +148,7 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
                 emote['apng_url'] = url_format.format(folder_name, file_name)
                 print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
         else:
+			checked_images_file.write(image_url + '\n')
             print "Didn't find an apng: " + image_url
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
 emote_data_file.write(''.join(["var berryEmotes=", dumps(emotes, separators=(',',':')), ";"]))
