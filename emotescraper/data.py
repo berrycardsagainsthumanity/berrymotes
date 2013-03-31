@@ -14,6 +14,7 @@ subreddits = [
     "mylittlepony",
     "adviceponies",
     "ainbowdash",
+    "anotherponymotessub",
     "applebloom",
     "applejack",
     "arborus",
