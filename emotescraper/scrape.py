@@ -2,17 +2,20 @@ from cookielib import CookieJar
 import itertools
 import os
 import urllib
-import tinycss
 import urllib2
 import re
 from collections import defaultdict
 from json import dumps
 import time
+
+import tinycss
+
 from data import *
+
 
 stylesheet_url_format = "http://www.reddit.com/r/{}/stylesheet"
 
-# subreddits = ["berrytubelounge"]
+#subreddits = ["mylittleandysonic1"]
 emotes = []
 
 user_agent = 'User-Agent: Ponymote harvester v1.0 by /u/marminatoror'
@@ -25,7 +28,7 @@ http_conn = opener.open(req, urllib.urlencode(formdata))
 http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
-emote_regex = re.compile('a\[href[|^]?="/([\w]+)')
+emote_regex = re.compile('a\[href[|^]?=["\']/([\w:]+)["\']\](:hover)?')
 folder_regex = re.compile('http://(.)')
 
 for subreddit in subreddits:
@@ -57,13 +60,19 @@ for subreddit in subreddits:
                 rules = {}
                 for declaration in rule.declarations:
                     if declaration.name in rules_we_care_about:
-                        if declaration.name == 'background-position':
+                        name = declaration.name
+                        if name == 'background-position':
                             val = ['{}{}'.format(v.value, v.unit if v.unit else '') for v in declaration.value if
                                    v.value != ' ']
+                            if match.group(2):
+                                name = 'hover-background-position'
+                        elif name == 'background-image' and match.group(2):
+                                name = 'hover-background-image'
+                                val = declaration.value[0].value
                         else:
                             val = declaration.value[0].value
-                        rules[declaration.name] = val
-                    emotes_staging[match.group(1)].update(rules)
+                        rules[name] = val
+                        emotes_staging[match.group(1)].update(rules)
 
     key_func = lambda e: e[1]
     for emote, group in itertools.groupby(sorted(emotes_staging.iteritems(), key=key_func), key_func):
@@ -99,10 +108,10 @@ if not os.path.exists('../images'):
 checked_images = []
 checked_images_file = open('checked_images.txt', 'rb')
 for line in checked_images_file:
-	checked_images.append(line.strip('\n'))
+    checked_images.append(line.strip('\n'))
 checked_images_file.close()
 checked_images_file = open('checked_images.txt', 'a')
-	
+
 key_func = lambda e: e['background-image']
 for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
     file_name = image_url[image_url.rfind('/') + 1:]
@@ -148,9 +157,9 @@ for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func
                 emote['apng_url'] = url_format.format(folder_name, file_name)
                 print 'saved an apng. Url: {}, names: {}, sr: {} '.format(image_url, emote['names'], emote['sr'])
         else:
-			checked_images_file.write(image_url + '\n')
-            print "Didn't find an apng: " + image_url
+            checked_images_file.write(image_url + '\n')
+        print "Didn't find an apng: " + image_url
 emote_data_file = open('../js/berrymotes_data.js', 'wb')
-emote_data_file.write(''.join(["var berryEmotes=", dumps(emotes, separators=(',',':')), ";"]))
+emote_data_file.write(''.join(["var berryEmotes=", dumps(emotes, separators=(',', ':')), ";"]))
 emote_data_file.close()
 
