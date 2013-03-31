@@ -310,16 +310,32 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             $emote.hover(function(){
                     var $this = $(this);
                     var position_string = (emote['hover-background-position'] || ['0px', '0px']).join(' ');
+                    var width = emote['hover-width'];
+                    var height = emote['hover-height'];
                     $this.css('background-position', position_string);
                     if(emote['hover-background-image']){
                         $this.css('background-image', ['url(', emote['hover-background-image'], ')'].join(''));
+                    }
+                    if (width) {
+                        $this.css('width', width);   
+                    }
+                    if (height) {
+                        $this.css('height', height);
                     }
             }, 
             function(){
                     var $this = $(this);
                     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
+                    var width = emote['width'];
+                    var height = emote['height'];
                     $this.css('background-position', position_string);
                     $this.css('background-image', ['url(', emote['background-image'], ')'].join(''));
+                    if (width) {
+                        $this.css('width', width);   
+                    }
+                    if (height) {
+                        $this.css('height', height);
+                    }
             });
         }
         if (username == "Marminator") {
