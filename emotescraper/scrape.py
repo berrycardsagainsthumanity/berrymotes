@@ -61,14 +61,11 @@ for subreddit in subreddits:
                 for declaration in rule.declarations:
                     if declaration.name in rules_we_care_about:
                         name = declaration.name
+                        if match.group(2):
+                            name = 'hover-' + name
                         if name == 'background-position':
                             val = ['{}{}'.format(v.value, v.unit if v.unit else '') for v in declaration.value if
                                    v.value != ' ']
-                            if match.group(2):
-                                name = 'hover-background-position'
-                        elif name == 'background-image' and match.group(2):
-                                name = 'hover-background-image'
-                                val = declaration.value[0].value
                         else:
                             val = declaration.value[0].value
                         rules[name] = val
