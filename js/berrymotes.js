@@ -113,17 +113,17 @@ function applyEmotesToStr(chatMessage) {
         if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
             var skip = false;
-            for(var i = 0; i < berryEmoteBlacklist.length; i++){
-                if(emote.names.indexOf($.trim(berryEmoteBlacklist[i])) > -1){
-                    skip=true;
+            for (var i = 0; i < berryEmoteBlacklist.length; i++) {
+                if (emote.names.indexOf($.trim(berryEmoteBlacklist[i])) > -1) {
+                    skip = true;
                 }
             }
-            if(skip===true) continue;
-            
+            if (skip === true) continue;
+
             if (showNsfwEmotes === false && emote.nsfw) continue;
             var emote_code = getEmoteHtml(emote, match[2]);
             if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(',match[3] ,')\\)'].join(''), 'gi');
+            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(', match[3] , ')\\)'].join(''), 'gi');
             if (berryEmotesDebug) console.log('Replace regex: ', replace_regex);
             chatMessage = chatMessage.replace(replace_regex, emote_code + '$2');
         }
@@ -146,7 +146,7 @@ function getEmoteHtml(emote, flags) {
             'flags="', flags, '" ',
             'emote_id="', emote.id , '"></span>'
         ].join('');
-    
+
     return emoteCode;
 }
 
@@ -220,7 +220,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 , '</span>'].join(''));
         });
     }
-    
+
     var emotes = message.find('.berryemote');
     if (!isSearch && berryEmotesEffects) {
         $.each(emotes, function (index, emoteDom) {
@@ -291,7 +291,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             }
             $emote.css('animation', animations.join(',').replace('!', '-'));
             if (berryEnableReverse && reverse) transforms.push('scaleX(-1)');
-            if(transforms.length > 0){
+            if (transforms.length > 0) {
                 $emote.css('transform', transforms.join(' '));
             }
         });
@@ -306,16 +306,20 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
         }
         $emote.attr('title', [emote.names, ' from ', emote.sr].join(''));
-        if(emote['hover-background-position']) {
+        if(emote['hover-background-position'] || emote['hover-background-image']) {
             $emote.hover(function(){
                     var $this = $(this);
                     var position_string = (emote['hover-background-position'] || ['0px', '0px']).join(' ');
                     $this.css('background-position', position_string);
+                    if(emote['hover-background-image']){
+                        $this.css('background-image', ['url(', emote['hover-background-image'], ')'].join(''));
+                    }
             }, 
             function(){
                     var $this = $(this);
                     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
-                    $this.css('background-position', position_string);            
+                    $this.css('background-position', position_string);
+                    $this.css('background-image', ['url(', emote['background-image'], ')'].join(''));
             });
         }
         if (username == "Marminator") {
@@ -359,7 +363,7 @@ function monkeyPatchChat() {
 function monkeyPatchPoll() {
     var oldPoll = newPoll;
     newPoll = function (data) {
-        for(var i = 0; i < data.options.length; ++i){
+        for (var i = 0; i < data.options.length; ++i) {
             // workaround so we don't conflict with BPM
             data.options[i] = data.options[i].replace(berryEmoteRegex, '\\\\$1$2$3');
         }
@@ -734,12 +738,12 @@ function showBerrymoteConfig() {
     effects = $('<div style="margin-left:10px; border: 1px solid black;"><div style="clear:both;"/></div>');
     configOps.append(effects);
 //----------------------------------------
-    berryCreateOption(effects, "Slide Effect",     "berryEnableSlide");
-    berryCreateOption(effects, "Spin Effect",     "berryEnableSpin");
-    berryCreateOption(effects, "Vibrate Effect",     "berryEnableVibrate");
+    berryCreateOption(effects, "Slide Effect", "berryEnableSlide");
+    berryCreateOption(effects, "Spin Effect", "berryEnableSpin");
+    berryCreateOption(effects, "Vibrate Effect", "berryEnableVibrate");
     berryCreateOption(effects, "Transpose (shift left and right) Effect", "berryEnableTranspose");
-    berryCreateOption(effects, "Reverse Effect",     "berryEnableReverse");
-    berryCreateOption(effects, "Rotate Effect",     "berryEnableRotate");
+    berryCreateOption(effects, "Reverse Effect", "berryEnableReverse");
+    berryCreateOption(effects, "Rotate Effect", "berryEnableRotate");
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     $('<span/>').text("Max Height:").appendTo(row);
@@ -782,7 +786,7 @@ function showBerrymoteConfig() {
     settWin.window.center();
 }
 
-function berryCreateOption(configOps, title, optionName){
+function berryCreateOption(configOps, title, optionName) {
     //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     $('<span/>').text(title).appendTo(row);
