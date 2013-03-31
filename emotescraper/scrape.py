@@ -60,7 +60,6 @@ for subreddit in subreddits:
                 rules = {}
                 for declaration in rule.declarations:
                     if declaration.name in rules_we_care_about:
-                        name = declaration.name
                         if match.group(2):
                             name = 'hover-' + name
                         if name == 'background-position':
@@ -68,6 +67,7 @@ for subreddit in subreddits:
                                    v.value != ' ']
                         else:
                             val = declaration.value[0].value
+                        name = declaration.name
                         rules[name] = val
                         emotes_staging[match.group(1)].update(rules)
 
