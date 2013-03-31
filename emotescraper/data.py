@@ -10,6 +10,7 @@ image_blacklist = [
 
 subreddits = [
     "marmemotes",
+    "btcanimotes",
     "jericksvector",
     "mylittlepony",
     "adviceponies",
