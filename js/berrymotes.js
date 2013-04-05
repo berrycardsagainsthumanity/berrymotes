@@ -14,6 +14,7 @@ var berryEnableVibrate = localStorage.getItem('berryEnableVibrate') !== "false";
 var berryEnableTranspose = localStorage.getItem('berryEnableTranspose') !== "false";
 var berryEnableReverse = localStorage.getItem('berryEnableReverse') !== "false";
 var berryEnableRotate = localStorage.getItem('berryEnableRotate') !== "false";
+var berryEnableBrody = localStorage.getItem('berryEnableBrody') !== "false";
 var berryEmoteBlacklist = (localStorage.getItem('berryEmoteBlacklist') || '').split(',');
 
 // Leaving as none so we can test for it later on.
@@ -235,12 +236,20 @@ function postEmoteEffects(message, isSearch, ttl, username) {
 
             var speed;
             var reverse;
+            var spin;
+            var brody;
             for (var i = 0; i < flags.length; ++i) {
                 if (berryEmoteAnimationSpeeds.indexOf(flags[i]) > -1 || flags[i].match(/^s\d/)) {
                     speed = flags[i];
                 }
                 if (flags[i] == 'r') {
                     reverse = true;
+                }
+                if (berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
+                    spin = true;
+                }
+                if (flags[i] == 'brody') {
+                    brody = true;
                 }
             }
             for (var i = 0; i < flags.length; ++i) {
@@ -258,10 +267,16 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                             if (!slideSpeed) slideSpeed = '8s';
                         }
                     }
-                    if (flags[i] == 'slide' && reverse)
-                        animations.push(['!slide', slideSpeed, 'infinite ease'].join(' '));
-                    else
-                        animations.push([flags[i], slideSpeed, 'infinite ease'].join(' '));
+
+                    animations.push(['slideleft', slideSpeed, 'infinite ease'].join(' '));
+                    if(!brody && !spin){
+                        if (flags[i] == 'slide' && reverse) {
+                            animations.push(['!slideflip', slideSpeed, 'infinite ease'].join(' '));
+                        }
+                        else {
+                            animations.push(['slideflip', slideSpeed, 'infinite ease'].join(' '));
+                        }
+                    }
                 }
                 if (berryEnableRotate && flags[i].match(/^\d+$/)) {
                     transforms.push('rotate(' + flags[i] + 'deg)');
@@ -283,12 +298,16 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     $emote.css('z-index', zindex);
                 }
                 if (berryEnableVibrate && (flags[i] == 'vibrate' || flags[i] == 'chargin' || flags[i] == 'v')) {
-                    animations.push('vibrate 0.05s infinite linear');
+                    animations.unshift('vibrate 0.05s infinite linear');
+                }
+                if (berryEnableBrody && (flags[i] == 'brody')) {
+                    animations.push('brody 1.2624s infinite ease');
                 }
             }
             if (animations.length > 0 && ttl) {
                 berryEmoteEffectStack.push({"ttl": ttl, "$emote": $emote});
             }
+
             $emote.css('animation', animations.join(',').replace('!', '-'));
             if (berryEnableReverse && reverse) transforms.push('scaleX(-1)');
             if (transforms.length > 0) {
@@ -306,24 +325,24 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
         }
         $emote.attr('title', [emote.names, ' from ', emote.sr].join(''));
-        if(emote['hover-background-position'] || emote['hover-background-image']) {
-            $emote.hover(function(){
+        if (emote['hover-background-position'] || emote['hover-background-image']) {
+            $emote.hover(function () {
                     var $this = $(this);
                     var position_string = (emote['hover-background-position'] || ['0px', '0px']).join(' ');
                     var width = emote['hover-width'];
                     var height = emote['hover-height'];
                     $this.css('background-position', position_string);
-                    if(emote['hover-background-image']){
+                    if (emote['hover-background-image']) {
                         $this.css('background-image', ['url(', emote['hover-background-image'], ')'].join(''));
                     }
                     if (width) {
-                        $this.css('width', width);   
+                        $this.css('width', width);
                     }
                     if (height) {
                         $this.css('height', height);
                     }
-            }, 
-            function(){
+                },
+                function () {
                     var $this = $(this);
                     var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
                     var width = emote['width'];
@@ -331,12 +350,12 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     $this.css('background-position', position_string);
                     $this.css('background-image', ['url(', emote['background-image'], ')'].join(''));
                     if (width) {
-                        $this.css('width', width);   
+                        $this.css('width', width);
                     }
                     if (height) {
                         $this.css('height', height);
                     }
-            });
+                });
         }
         if (username == "Marminator") {
             var flags = $emote.attr('flags').split('-');
@@ -760,6 +779,7 @@ function showBerrymoteConfig() {
     berryCreateOption(effects, "Transpose (shift left and right) Effect", "berryEnableTranspose");
     berryCreateOption(effects, "Reverse Effect", "berryEnableReverse");
     berryCreateOption(effects, "Rotate Effect", "berryEnableRotate");
+    berryCreateOption(effects, "Brody Effect", "berryEnableBrody");
 //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     $('<span/>').text("Max Height:").appendTo(row);
