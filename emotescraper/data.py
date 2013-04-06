@@ -21,6 +21,7 @@ subreddits = [
     "arborus",
     "beautybrass",
     "berrytubelounge",
+    "bigmacintosh",
     "clopclop",
     "cloudchasermotes",
     "cuttershy",
