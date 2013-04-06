@@ -5,7 +5,8 @@ nsfw_subreddits = [
 image_blacklist = [
     "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
     "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
-	"http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg"
+	"http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
+    "http://c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png"
 ]
 
 subreddits = [
