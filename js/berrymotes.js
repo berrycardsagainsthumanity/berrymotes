@@ -21,6 +21,7 @@ var berryEmoteBlacklist = (localStorage.getItem('berryEmoteBlacklist') || '').sp
 if (apngSupported === "false") apngSupported = false;
 var btLoggingIn = false;
 var berryEmoteMap;
+var berryEmoteMappedColours;
 var berryEmoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
 var berryEmoteSearchTerm;
 var berryEmotePage = 0;
@@ -35,7 +36,54 @@ var berryEmoteAnimationSpeedMap = {
     'faster': '4s',
     'fastest': '2s'
 };
-
+var maxColourDist = 15;
+var prominenceBoost = 5;
+var emoteSearchColours = ['#F37033',
+    '#F26F31',
+    '#EFB05D',
+    '#FFC261',
+    '#FEE78F',
+    '#BAB8B0',
+    '#EAD463',
+    '#FDF6AF',
+    '#FDF6AF',
+    '#62BC4D',
+    '#309931',
+    '#50C355',
+    '#6ADBAF',
+    '#93FFDB',
+    '#7BEBE9',
+    '#AFE8E7',
+    '#18E7E7',
+    '#52CFD1',
+    '#DEE3E4',
+    '#BEC2C3',
+    '#9EDBF9',
+    '#EBEFF1',
+    '#88C4EB',
+    '#77B0E0',
+    '#1448AD',
+    '#2A3C78',
+    '#263773',
+    '#5E4FA2',
+    '#4B2568',
+    '#49176D',
+    '#662D8A',
+    '#795B8A',
+    '#83509F',
+    '#A76BC2',
+    '#B689C8',
+    '#B28DC0',
+    '#D19FE3',
+    '#9A5DA2',
+    '#C590C9',
+    '#BE1D77',
+    '#EC9DC4',
+    '#EB81B4',
+    '#F6B8D2',
+    '#ED438A',
+    '#F3B6CF',
+    '#EE4144'];
 
 function marmReactiveMode() {
     if (berryEmotesDebug)
@@ -269,7 +317,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     }
 
                     animations.push(['slideleft', slideSpeed, 'infinite ease'].join(' '));
-                    if(!brody && !spin){
+                    if (!brody && !spin) {
                         if (flags[i] == 'slide' && reverse) {
                             animations.push(['!slideflip', slideSpeed, 'infinite ease'].join(' '));
                         }
@@ -480,6 +528,11 @@ function monkeyPatchTabComplete() {
 }
 
 function buildEmoteMap() {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'http://backstage.berrytube.tv/marminator/berrymotes_colour_data.js';
+    document.body.appendChild(script);
+
     berryEmoteMap = {};
     var max = berryEmotes.length;
     for (var i = 0; i < max; ++i) {
@@ -489,6 +542,19 @@ function buildEmoteMap() {
             berryEmotes[i].id = i;
         }
     }
+    var buildColourMap = function () {
+        if (typeof berryEmotesColours === "undefined" || !berryEmotesColours) {
+            setTimeout(buildColourMap, 1000);
+        } else {
+            berryEmoteMappedColours = [];
+            var max = berryEmotesColours.length;
+            for (var key in berryEmotesColours) {
+                berryEmoteMappedColours[berryEmoteMap[key]] = berryEmotesColours[key];
+            }
+            berryEmotesColours = null;
+        }
+    };
+    setTimeout(buildColourMap, 1000);
 }
 
 function injectEmoteButton() {
@@ -573,12 +639,14 @@ function showBerrymoteSearch() {
     var pageSize = 50;
     var page = 0;
     var searchResults = [];
+    var distances;
     var $searchBox = $('<input class="berrymotes_search" type="text" placeholder="Search..." />').appendTo(searchWin);
     if (berryEmoteSearchTerm) {
         $searchBox.val(berryEmoteSearchTerm);
     }
     $searchBox.focus();
     $searchBox.select();
+    var $colourBox = $('<input type="text" placeholder="hex value" />').appendTo(searchWin);
 
     $('<span class="prev_page" style="cursor: pointer; text-decoration: underline;" />')
         .appendTo(searchWin)
@@ -588,6 +656,22 @@ function showBerrymoteSearch() {
         .text("Next >");
     $('<span class="num_found" style="margin-left: 5px;" />')
         .appendTo(searchWin);
+    var $colourSelector = $('<div />').addClass('colour_selector').appendTo(searchWin);
+    for (var i = 0; i < emoteSearchColours.length; ++i) {
+        $('<span/>')
+            .addClass('colour')
+            .css('background-color', emoteSearchColours[i])
+            .css('width', (99 / emoteSearchColours.length) + '%')
+            .css('height', '30px')
+            .css('display', 'inline-block')
+            .data('colour', emoteSearchColours[i])
+            .appendTo($colourSelector);
+    }
+    $colourSelector.on('click', '.colour', function (e) {
+        var colour = $(e.currentTarget).data('colour');
+        $colourBox.val(colour);
+        berryEmoteSearch(0);
+    });
 
     var $results = $('<div class="berrymotes_search_results" style="width:500px; height: 500px; overflow-y: scroll;" ></div>').appendTo(searchWin);
     $results.on('click', '.berryemote', function (e) {
@@ -600,6 +684,7 @@ function showBerrymoteSearch() {
     });
 
     searchWin.on('click', '.next_page, .prev_page', function (e) {
+        $results.scrollTop(0);
         var $button = $(e.currentTarget);
         if ($button.is('.next_page')) {
             if ((page === 0 && searchResults.length > pageSize) ||
@@ -630,8 +715,12 @@ function showBerrymoteSearch() {
 
     var berryEmoteSearch = function (startPage) {
         searchResults = [];
+        distances = [];
         var term = $searchBox.val();
         berryEmoteSearchTerm = term;
+        var colour = $colourBox.val();
+        if (colour)
+            colour = Color.convert(colour, 'lab');
         if (!term) {
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
@@ -676,12 +765,61 @@ function showBerrymoteSearch() {
                     }
                 }
             }
+
+        }
+        if (colour) {
+            var colourSearchResults = [];
+            distances = {};
+            for (var i = 0; i < searchResults.length; ++i) {
+                var l1 = colour.l;
+                var a1 = colour.a;
+                var b1 = colour.b;
+                var colourDistance = 100000;
+                var emoteProminence;
+                var emoteColours = berryEmoteMappedColours[searchResults[i]];
+                if (!emoteColours) continue;
+                for (var j = 0; j < emoteColours.length; ++j) {
+                    var l2 = emoteColours[j][0];
+                    var a2 = emoteColours[j][1];
+                    var b2 = emoteColours[j][2];
+                    var prominence = emoteColours[j][3];
+                    // Can save the sqrt until later
+                    var dist = (l2 - l1) * (l2 - l1) + (a2 - a1) * (a2 - a1) + (b2 - b1) * (b2 - b1);
+                    if (dist < colourDistance) {
+                        colourDistance = dist;
+                        emoteProminence = prominence;
+                    }
+                }
+                colourDistance = Math.sqrt(colourDistance);
+                if (colourDistance < maxColourDist) {
+                    distances[searchResults[i]] = colourDistance - (colourDistance * prominence * prominenceBoost);
+                    colourSearchResults.push(searchResults[i]);
+                }
+            }
+            searchResults = colourSearchResults;
+            searchResults.sort(function (a, b) {
+                return distances[a] - distances[b];
+            });
+        } else {
+            distances = null;
         }
         page = startPage;
         showSearchResults();
     };
 
     $searchBox.keyup(function (e) {
+        clearTimeout(searchTimer);
+        if (e.keyCode == 13) {
+            berryEmoteSearch(0);
+        }
+        // don't search if they release control otherwise the shortcut loses your page#
+        else if (e.keyCode != 17) {
+            searchTimer = setTimeout(function () {
+                berryEmoteSearch(0);
+            }, 250);
+        }
+    });
+    $colourBox.keyup(function (e) {
         clearTimeout(searchTimer);
         if (e.keyCode == 13) {
             berryEmoteSearch(0);
@@ -852,7 +990,8 @@ if (apngSupported === null) {
                 document.body.appendChild(script);
             }
         };
-        apngTest.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
+        apngTest.src =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
         // frame 1 (skipped on apng-supporting browsers): [0, 0, 0, 255]
         // frame 2: [0, 0, 0, 0]
     }());
@@ -864,4 +1003,10 @@ else if (apngSupported === false) {
     document.body.appendChild(script);
 }
 
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'http://backstage.berrytube.tv/marminator/i-color.min.js';
+document.body.appendChild(script);
+
 waitToStart();
+
