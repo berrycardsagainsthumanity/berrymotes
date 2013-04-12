@@ -492,6 +492,13 @@ function monkeyPatchTabComplete() {
             var ret = [];
             for (var i in berryEmoteMap) {
                 if (!showNsfwEmotes && berryEmotes[berryEmoteMap[i]].nsfw) continue;
+                var skip = false;
+                for (var j = 0; j < berryEmoteBlacklist.length; j++) {
+                    if (berryEmotes[berryEmoteMap[i]].names.indexOf($.trim(berryEmoteBlacklist[j])) > -1) {
+                        skip = true;
+                    }
+                }
+                if (skip === true) continue;
                 var m = i.match(re);
                 if (m) ret.push(m[0]);
             }
