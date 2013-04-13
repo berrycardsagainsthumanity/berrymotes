@@ -312,4 +312,8 @@ emote_info = [
         'name': 'ponykoreaisbestkorea',
         'nsfw': True
     },
+    {
+        'name': 'opdelivers',
+        'nsfw': True
+    },
 ]
