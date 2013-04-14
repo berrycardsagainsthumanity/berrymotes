@@ -111,6 +111,7 @@ subreddits = [
     "tbpimagedump",
     "tbpimagedump2",
     "thebestpony",
+    "themirishponies",
     "twilightsparkle",
     "vinylscratch"
 ]
