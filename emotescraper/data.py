@@ -110,6 +110,7 @@ subreddits = [
     "tacoshy",
     "tbpimagedump",
     "tbpimagedump2",
+    "thanksblueshift",
     "thebestpony",
     "themirishponies",
     "twilightsparkle",
