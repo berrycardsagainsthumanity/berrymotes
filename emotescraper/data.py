@@ -65,6 +65,7 @@ subreddits = [
     "mylittleconspiracy",
     "mylittledamon",
     "mylittledaww",
+    "mylittledota",
     "mylittledramaticstory",
     "mylittlefalloutdiary",
     "mylittlefoodmanes",
