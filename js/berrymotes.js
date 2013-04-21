@@ -350,7 +350,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     animations.unshift('vibrate 0.05s infinite linear');
                 }
                 if (berryEnableBrody && (flags[i] == 'brody')) {
-                    animations.push('brody 1.2624s infinite ease');
+                    animations.push('brody  1.27659s infinite ease');
                 }
             }
             if (animations.length > 0 && ttl) {
