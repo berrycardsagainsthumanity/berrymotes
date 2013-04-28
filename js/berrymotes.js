@@ -306,7 +306,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     animations.push(flags[i] + ' 2s infinite linear');
                     if (flags[i] == 'zspin') {
                         var diag = Math.sqrt($emote.width()*$emote.width() + $emote.height()*$emote.height());
-                        $emote.wrap('<span />').parent().css({'height': diag, 'display': 'inline-block'});
+                        $emote.wrap('<span />').parent().css({'height': 0.5*($emote.height() + diag), 'display': 'inline-block'});
                     }
                 }
                 if (berryEnableSlide && (flags[i] == 'slide' || flags[i] == '!slide')) {
