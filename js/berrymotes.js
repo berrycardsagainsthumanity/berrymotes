@@ -304,6 +304,10 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             for (var i = 0; i < flags.length; ++i) {
                 if (berryEnableSpin && berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
                     animations.push(flags[i] + ' 2s infinite linear');
+                    if (flags[i] == 'zspin') {
+                        var diag = Math.sqrt($emote.width()*$emote.width() + $emote.height()*$emote.height());
+                        $emote.wrap('<span />').parent().css({'height': diag, 'display': 'inline-block'});
+                    }
                 }
                 if (berryEnableSlide && (flags[i] == 'slide' || flags[i] == '!slide')) {
                     var slideSpeed = '8s';
@@ -351,6 +355,8 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 }
                 if (berryEnableBrody && (flags[i] == 'brody')) {
                     animations.push('brody  1.27659s infinite ease');
+                    var brody_height = $emote.width()*Math.sin(10*Math.PI/180) + $emote.height()*Math.cos(10*Math.PI/180);
+                    $emote.wrap('<span />').parent().css({'height': brody_height, 'display': 'inline-block'});
                 }
             }
             if (animations.length > 0 && ttl) {
@@ -1017,4 +1023,3 @@ script.src = 'http://backstage.berrytube.tv/marminator/i-color.min.js';
 document.body.appendChild(script);
 
 waitToStart();
-
