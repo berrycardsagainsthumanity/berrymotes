@@ -333,6 +333,8 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 }
                 if (berryEnableRotate && flags[i].match(/^\d+$/)) {
                     transforms.push('rotate(' + flags[i] + 'deg)');
+                    var rot_height = $emote.width()*Math.sin(flags[i]*Math.PI/180) + $emote.height()*Math.cos(flags[i]*Math.PI/180);
+                    $emote.wrap('<span />').parent().css({'height': rot_height, 'display': 'inline-block'});
                 }
                 if (berryEnableTranspose && flags[i].match(/^x\d+$/)) {
                     var shift = +flags[i].replace('x', '');
