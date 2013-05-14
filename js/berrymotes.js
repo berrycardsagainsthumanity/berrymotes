@@ -166,20 +166,13 @@ function applyEmotesToStr(chatMessage) {
         var emote_id = berryEmoteMap[match[1]];
         if (emote_id !== undefined) {
             var emote = berryEmotes[emote_id];
-            var skip = false;
-            for (var i = 0; i < berryEmoteBlacklist.length; i++) {
-                if (emote.names.indexOf($.trim(berryEmoteBlacklist[i])) > -1) {
-                    skip = true;
-                }
-            }
-            if (skip === true) continue;
-
-            if (showNsfwEmotes === false && emote.nsfw) continue;
-            var emote_code = getEmoteHtml(emote, match[2]);
-            if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
-            var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(', match[3] , ')\\)'].join(''), 'gi');
-            if (berryEmotesDebug) console.log('Replace regex: ', replace_regex);
-            chatMessage = chatMessage.replace(replace_regex, emote_code + '$2');
+            if(isEmoteEligible(emote)){
+				var emote_code = getEmoteHtml(emote, match[2]);
+				if (berryEmotesDebug) console.log('Emote code: ' + emote_code);
+				var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(', match[3] , ')\\)'].join(''), 'gi');
+				if (berryEmotesDebug) console.log('Replace regex: ', replace_regex);
+				chatMessage = chatMessage.replace(replace_regex, emote_code + '$2');
+			}
         }
     }
     return chatMessage;
@@ -202,6 +195,17 @@ function getEmoteHtml(emote, flags) {
         ].join('');
 
     return emoteCode;
+}
+
+function isEmoteEligible(emote){
+	var eligible = true;
+	for (var j = 0; j < berryEmoteBlacklist.length; j++) {
+		if (emote.names.indexOf($.trim(berryEmoteBlacklist[j])) > -1) {
+			eligible = false;
+		}
+	}
+	if (showNsfwEmotes === false && emote.nsfw) eligible = false;
+	return eligible;
 }
 
 function applyAnimation(emote, $emote) {
@@ -485,23 +489,26 @@ function monkeyPatchChat() {
 function monkeyPatchPoll() {
     var oldPoll = newPoll;
     newPoll = function (data) {
-        for (var i = 0; i < data.options.length; ++i) {
-            // workaround so we don't conflict with BPM
-            data.options[i] = data.options[i].replace(berryEmoteRegex, '\\\\$1$2$3');
-        }
+		if(berryEmotesEnabled){
+			for (var i = 0; i < data.options.length; ++i) {
+				// workaround so we don't conflict with BPM
+				data.options[i] = data.options[i].replace(berryEmoteRegex, '\\\\$1$2$3');
+			}
+		}
         oldPoll(data);
-        var poll = $('.poll.active');
-        var options = poll.find('div.label, .title');
-        $.each(options, function (i, option) {
-            var $option = $(option);
-            if (berryEmotesDebug) console.log(option);
-            var t = $option.text().replace(">", "&gt;").replace("<", "&lt;");
-            t = t.replace(/\\\\([\w-]+)/i, '[](/$1)');
-            t = applyEmotesToStr(t);
-            $option.html(t);
-            postEmoteEffects($option);
-        });
-
+		if(berryEmotesEnabled){
+			var poll = $('.poll.active');
+			var options = poll.find('div.label, .title');
+			$.each(options, function (i, option) {
+				var $option = $(option);
+				if (berryEmotesDebug) console.log(option);
+				var t = $option.text().replace(">", "&gt;").replace("<", "&lt;");
+				t = t.replace(/\\\\([\w-]+)/i, '[](/$1)');
+				t = applyEmotesToStr(t);
+				$option.html(t);
+				postEmoteEffects($option);
+			});
+		}
     }
 }
 
@@ -530,16 +537,10 @@ function monkeyPatchTabComplete() {
 
             var ret = [];
             for (var i in berryEmoteMap) {
-                if (!showNsfwEmotes && berryEmotes[berryEmoteMap[i]].nsfw) continue;
-                var skip = false;
-                for (var j = 0; j < berryEmoteBlacklist.length; j++) {
-                    if (berryEmotes[berryEmoteMap[i]].names.indexOf($.trim(berryEmoteBlacklist[j])) > -1) {
-                        skip = true;
-                    }
-                }
-                if (skip === true) continue;
-                var m = i.match(re);
-                if (m) ret.push(m[0]);
+				if(isEmoteEligible(berryEmoteMap[i])){
+					var m = i.match(re);
+					if (m) ret.push(m[0]);
+				}
             }
             ret.sort();
 
@@ -771,8 +772,9 @@ function showBerrymoteSearch() {
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
                 var emote = berryEmotes[i];
-                if (showNsfwEmotes === false && emote.nsfw) continue;
-                searchResults.push(i);
+				if(isEmoteEligible){
+					searchResults.push(i);
+				}
             }
         }
         else {
@@ -795,8 +797,7 @@ function showBerrymoteSearch() {
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
                 var emote = berryEmotes[i];
-                if (showNsfwEmotes === false && emote.nsfw) continue;
-                if (!emote[searchField]) continue;
+                if(!isEmoteEligible(emote)) continue;
                 if ($.isArray(emote[searchField])) {
                     for (var j = 0; j < emote[searchField].length; ++j) {
                         if (emote[searchField][j].match(shittyDrunkenRegex)) {

@@ -24,6 +24,7 @@ subreddits = [
     "berrytubelounge",
     "berrytubetf2",
     "bigmacintosh",
+	"chakolateemotes",
     "clopclop",
     "cloudchasermotes",
     "cuttershy",
