@@ -121,12 +121,16 @@ function marmReactiveMode() {
         playlist.hide();
     });
 
-    var showPlaylist = function () {
-        playlist.show();
-        if (TYPE > 0) {
-            playlist.css('padding-top', '70px');
+    $(window).bindFirst('keydown',function(event) {
+        if (event.keyCode == 27) {
+            playlist.hide();
+            return true;
         }
-    };
+        if (!(event.keyCode == 70 && event.ctrlKey)) return true; 
+        event.preventDefault();
+        playlist.show();
+        return false;
+    });
 
     whenExists('#chatControls', function () {
         if (berryEmotesDebug) console.log('Injecting playlist button.');
@@ -134,7 +138,7 @@ function marmReactiveMode() {
         menu.css('margin-right', '2px');
         menu.css('background', 'none');
         menu.click(function () {
-            showPlaylist();
+            playlist.show();
             smartRefreshScrollbar();
             realignPosHelper();
             if (getCookie("plFolAcVid") == "1") {
@@ -304,7 +308,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             for (var i = 0; i < flags.length; ++i) {
                 if (berryEnableSpin && berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
                     animations.push(flags[i] + ' 2s infinite linear');
-                    if (flags[i] == 'zspin') {
+                    if (flags[i] == 'zspin' || flags[i] == 'spin') {
                         var diag = Math.sqrt($emote.width()*$emote.width() + $emote.height()*$emote.height());
                         $emote.wrap('<span />').parent().css({'height': 0.5*($emote.height() + diag), 'display': 'inline-block'});
                     }
@@ -1023,3 +1027,22 @@ script.src = 'http://backstage.berrytube.tv/marminator/i-color.min.js';
 document.body.appendChild(script);
 
 waitToStart();
+
+// [name] is the name of the event "click", "mouseover", .. 
+// same as you'd pass it to bind()
+// [fn] is the handler function
+$.fn.bindFirst = function(name, fn) {
+    // bind as you normally would
+    // don't want to miss out on any jQuery magic
+    this.on(name, fn);
+
+    // Thanks to a comment by @Martin, adding support for
+    // namespaced events too.
+    this.each(function() {
+        var handlers = $._data(this, 'events')[name.split('.')[0]];
+        // take out the handler we just inserted from the end
+        var handler = handlers.pop();
+        // move it at the beginning
+        handlers.splice(0, 0, handler);
+    });
+};
