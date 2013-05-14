@@ -211,6 +211,15 @@ function applyAnimation(emote, $emote) {
     });
 }
 
+function wrapEmoteHeight($emote, height) {
+    $emote.css({'bottom': -(height-$emote.height())/2});
+    $emote.wrap('<span class="rotation-wrapper" />').parent().css({
+        'height': height,
+        'display': 'inline-block',
+        'vertical-align': 'bottom',
+        'position': 'relative'});
+}
+
 function postEmoteEffects(message, isSearch, ttl, username) {
     if (!apngSupported) {
         var emotesToAnimate = message.find('.canvasapng');
@@ -281,12 +290,14 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             var grandParent = $emote.parents('.berryemote-wrapper-outer');
             $emote = grandParent.is('.berryemote-wrapper-outer') ? grandParent : $emote;
             var animations = [];
+            var wrapperAnimations = [];
             var transforms = [];
 
             var speed;
             var reverse;
             var spin;
             var brody;
+            var needsWrapper;
             for (var i = 0; i < flags.length; ++i) {
                 if (berryEmoteAnimationSpeeds.indexOf(flags[i]) > -1 || flags[i].match(/^s\d/)) {
                     speed = flags[i];
@@ -300,16 +311,22 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 if (flags[i] == 'brody') {
                     brody = true;
                 }
+                if ((berryEnableSpin && (flags[i] == 'spin' || flags[i] == 'zspin')) ||
+                    (berryEnableRotate && flags[i].match(/^\d+$/)) ||
+                    (berryEnableBrody && flags[i] == 'brody')) {
+                    needsWrapper = true;
+                }
             }
             for (var i = 0; i < flags.length; ++i) {
                 if (berryEnableSpin && berryEmoteSpinAnimations.indexOf(flags[i]) != -1) {
                     animations.push(flags[i] + ' 2s infinite linear');
                     if (flags[i] == 'zspin' || flags[i] == 'spin') {
                         var diag = Math.sqrt($emote.width()*$emote.width() + $emote.height()*$emote.height());
-                        $emote.wrap('<span />').parent().css({'height': 0.5*($emote.height() + diag), 'display': 'inline-block'});
+                        wrapEmoteHeight($emote, diag);
                     }
                 }
                 if (berryEnableSlide && (flags[i] == 'slide' || flags[i] == '!slide')) {
+                    slideAnimations = [];
                     var slideSpeed = '8s';
                     if (speed) {
                         if (speed.match(/^s\d/)) {
@@ -321,20 +338,26 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                         }
                     }
 
-                    animations.push(['slideleft', slideSpeed, 'infinite ease'].join(' '));
+                    slideAnimations.push(['slideleft', slideSpeed, 'infinite ease'].join(' '));
                     if (!brody && !spin) {
                         if (flags[i] == 'slide' && reverse) {
-                            animations.push(['!slideflip', slideSpeed, 'infinite ease'].join(' '));
+                            slideAnimations.push(['!slideflip', slideSpeed, 'infinite ease'].join(' '));
                         }
                         else {
-                            animations.push(['slideflip', slideSpeed, 'infinite ease'].join(' '));
+                            slideAnimations.push(['slideflip', slideSpeed, 'infinite ease'].join(' '));
                         }
+                    }
+                    if (!needsWrapper) {
+                        animations.push.apply(animations, slideAnimations);
+                    }
+                    else {
+                        wrapperAnimations.push.apply(wrapperAnimations, slideAnimations);
                     }
                 }
                 if (berryEnableRotate && flags[i].match(/^\d+$/)) {
                     transforms.push('rotate(' + flags[i] + 'deg)');
                     var rot_height = $emote.width()*Math.sin(flags[i]*Math.PI/180) + $emote.height()*Math.cos(flags[i]*Math.PI/180);
-                    $emote.wrap('<span />').parent().css({'height': rot_height, 'display': 'inline-block'});
+                    wrapEmoteHeight($emote, rot_height);
                 }
                 if (berryEnableTranspose && flags[i].match(/^x\d+$/)) {
                     var shift = +flags[i].replace('x', '');
@@ -358,7 +381,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 if (berryEnableBrody && (flags[i] == 'brody')) {
                     animations.push('brody  1.27659s infinite ease');
                     var brody_height = $emote.width()*Math.sin(10*Math.PI/180) + $emote.height()*Math.cos(10*Math.PI/180);
-                    $emote.wrap('<span />').parent().css({'height': brody_height, 'display': 'inline-block'});
+                    wrapEmoteHeight($emote, brody_height);
                 }
             }
             if (animations.length > 0 && ttl) {
@@ -366,6 +389,9 @@ function postEmoteEffects(message, isSearch, ttl, username) {
             }
 
             $emote.css('animation', animations.join(',').replace('!', '-'));
+            if (needsWrapper) {
+                $emote.parent().css('animation', wrapperAnimations.join(',').replace('!', '-'));
+            }
             if (berryEnableReverse && reverse) transforms.push('scaleX(-1)');
             if (transforms.length > 0) {
                 $emote.css('transform', transforms.join(' '));
