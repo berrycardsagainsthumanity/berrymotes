@@ -34,7 +34,8 @@ http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
 emote_regex = re.compile('a\[href[|^]?=["\']/([\w:]+)["\']\](:hover)?')
-folder_regex = re.compile('http://(.)')
+# https://s3.amazonaws.com/b.thumbs.redditmedia.com/9NANMOSLqQcBxhMs.png
+folder_regex = re.compile('(.)\.thumbs.redditmedia.com')
 
 colour_data_file = open('colour_data.txt', 'rb')
 colour_data = loads(colour_data_file.read())
@@ -198,9 +199,16 @@ def scrape():
     checked_images_file = open('checked_images.txt', 'a')
     key_func = lambda e: e['background-image']
     for image_url, group in itertools.groupby(sorted(emotes, key=key_func), key_func):
+        if not image_url:
+            continue
         group = list(group)
         file_name = image_url[image_url.rfind('/') + 1:]
-        folder_name = folder_regex.search(image_url).group(1)
+        print 'Doing something to: ' + image_url
+        folder_name = folder_regex.search(image_url)
+        if not folder_name:
+            folder_name = 't'
+        else:
+            folder_name = folder_name.group(1)
         folder_array = ['../images', folder_name]
         path_array = folder_array[:]
         path_array.append(file_name)

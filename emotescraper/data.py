@@ -22,6 +22,7 @@ subreddits = [
     "arborus",
     "beautybrass",
     "berrytubelounge",
+    "berrytubetf2",
     "bigmacintosh",
     "clopclop",
     "cloudchasermotes",
@@ -68,8 +69,10 @@ subreddits = [
     "mylittledota",
     "mylittledramaticstory",
     "mylittlefalloutdiary",
+    "mylittlefistfight",
     "mylittlefoodmanes",
     "mylittlefortress",
+    "mylittlegooglyeyes",
     "mylittleicons",
     "mylittlekindle",
     "mylittlelistentothis",
@@ -115,7 +118,8 @@ subreddits = [
     "thebestpony",
     "themirishponies",
     "twilightsparkle",
-    "vinylscratch"
+    "vinylscratch",
+    "rarity"
 ]
 
 emote_info = [
@@ -317,6 +321,14 @@ emote_info = [
     },
     {
         'name': 'opdelivers',
+        'nsfw': True
+    },
+    {
+        'name': 'googlykoreaisbestkorea',
+        'nsfw': True
+    },
+    {
+        'name': 'lyrapenisdoubt',
         'nsfw': True
     },
 ]
