@@ -28,6 +28,7 @@ var berryEmotePage = 0;
 var berryEmoteEffectStack = [];
 var berryEmoteSpinAnimations = ['spin', 'zspin', 'xspin', 'yspin', '!spin', '!zspin', '!xspin', '!yspin'];
 var berryEmoteAnimationSpeeds = ['slowest', 'slower', 'slow', 'fast', 'faster', 'fastest'];
+var berryEmoteRefreshers = ['marminator', 'toastdeib', 'miggyb'];
 var berryEmoteAnimationSpeedMap = {
     'slowest': '14s',
     'slower': '12s',
@@ -448,7 +449,8 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                     }
                 });
         }
-        if (username == "Marminator") {
+        username = username || "";
+        if (berryEmoteRefreshers.indexOf(username.toLowerCase()) > -1) {
             var flags = $emote.attr('flags').split('-');
             if (flags.indexOf('refresh') >= 0) {
                 var sleep = Math.random() * 30;
