@@ -221,11 +221,11 @@ function applyAnimation(emote, $emote) {
 }
 
 function wrapEmoteHeight($emote, height) {
-	var offset = (height-$emote.height())/2;
+    var offset = (height-$emote.height())/2;
     $emote.wrap('<span class="rotation-wrapper" />').parent().css({
-        'height': height - offset,
+        'height': Math.ceil(height - offset),
         'display': 'inline-block',
-		'margin-top': offset,
+        'margin-top': Math.floor(offset),
         'position': 'relative'});
 }
 
@@ -365,7 +365,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 }
                 if (berryEnableRotate && flags[i].match(/^\d+$/)) {
                     transforms.push('rotate(' + flags[i] + 'deg)');
-                    var rot_height = $emote.width()*Math.sin(flags[i]*Math.PI/180) + $emote.height()*Math.cos(flags[i]*Math.PI/180);
+                    var rot_height = $emote.width()*Math.abs(Math.sin(flags[i]*Math.PI/180)) + $emote.height()*Math.abs(Math.cos(flags[i]*Math.PI/180));
                     wrapEmoteHeight($emote, rot_height);
                 }
                 if (berryEnableTranspose && flags[i].match(/^x\d+$/)) {
