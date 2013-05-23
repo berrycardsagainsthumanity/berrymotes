@@ -221,11 +221,11 @@ function applyAnimation(emote, $emote) {
 }
 
 function wrapEmoteHeight($emote, height) {
-	var offset = (height-$emote.height())/2;
+    var offset = (height-$emote.height())/2;
     $emote.wrap('<span class="rotation-wrapper" />').parent().css({
-        'height': height - offset,
+        'height': Math.ceil(height - offset),
         'display': 'inline-block',
-		'margin-top': offset,
+        'margin-top': Math.floor(offset),
         'position': 'relative'});
 }
 
