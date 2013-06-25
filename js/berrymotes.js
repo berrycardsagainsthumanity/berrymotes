@@ -262,6 +262,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
         outerWrap.css('display', 'inline-block');
         outerWrap.css('position', 'relative');
         innerWrap.css('transform', ['scale(', scale, ', ', scale, ')'].join(''));
+        innerWrap.css('-webkit-transform', ['scale(', scale, ', ', scale, ')'].join(''));
         innerWrap.css('transform-origin', 'left top');
         innerWrap.css('position', 'absolute');
         innerWrap.css('top', '0');
