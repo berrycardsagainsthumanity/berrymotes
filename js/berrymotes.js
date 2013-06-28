@@ -589,8 +589,15 @@ function buildEmoteMap() {
         var berryemote = berryEmotes[i];
         for (var j = 0; j < berryemote.names.length; ++j) {
             berryEmoteMap[berryemote.names[j]] = i;
-            berryEmotes[i].id = i;
+			berryemote.id = i;
         }
+		if(!berryemote.tags) berryemote.tags = [];
+		if(berryemote.apng_url) {
+			berryemote.tags.push('animated');
+		}
+		if(berryemote.nsfw) {
+			berryemote.tags.push('nsfw');
+		}
     }
     var buildColourMap = function () {
         if (typeof berryEmotesColours === "undefined" || !berryEmotesColours) {
@@ -765,7 +772,7 @@ function showBerrymoteSearch() {
 
     var berryEmoteSearch = function (startPage) {
         searchResults = [];
-        distances = [];
+		distances = [];
         var term = $searchBox.val();
         berryEmoteSearchTerm = term;
         var colour = $colourBox.val();
@@ -775,58 +782,132 @@ function showBerrymoteSearch() {
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
                 var emote = berryEmotes[i];
-				if(isEmoteEligible){
+				if(isEmoteEligible(emote)){
 					searchResults.push(i);
 				}
             }
         }
         else {
-            var isTagSearch = term.match(/^\+/);
-            var isSubredditSearch = term.match(/^sr:/);
-            var shittyDrunkenRegex;
-            var searchField;
-            if (isTagSearch) {
-                shittyDrunkenRegex = new RegExp('^' + $.trim(term.substring(1)), 'i');
-                searchField = 'tags';
-            }
-            else if (isSubredditSearch) {
-                shittyDrunkenRegex = new RegExp('^' + $.trim(term.substring(3)), 'i');
-                searchField = 'sr';
-            }
-            else {
-                shittyDrunkenRegex = new RegExp(term, 'i');
-                searchField = 'names';
-            }
+			var searchBits = term.split(' ');
+			var tags = [];
+			var srs = [];
+			var terms = [];
+			var scores = {};
+			var srRegex = /^[-+]?sr:/i;
+			var tagRegex = /^[-+]/i;
+			function sdrify(str){
+				return new RegExp('^' + str, 'i');
+			}
+			
+			for(var i=0;i<searchBits.length;++i) {
+				var bit = $.trim(searchBits[i]);
+				if(bit.match(srRegex)) {
+					if(bit[0] == '-' || bit[0] == '+') {
+						srs.push({match: bit[0] == '-' ? false : true, sdr: sdrify(bit.substring(4))});
+					} else {
+						srs.push({match:true, sdr: sdrify(bit.substring(3))});
+					}
+				} else if(bit.match(tagRegex)) {
+					tags.push({match: bit[0] == '-' ? false : true, sdr: sdrify(bit.substring(1))});
+				} else {
+					terms.push({
+							any:new RegExp(bit, 'i'), 
+							prefix: sdrify(bit), 
+							exact:new RegExp('^'+bit+'$')
+						});
+				}
+			}
+            
             var max = berryEmotes.length;
             for (var i = 0; i < max; ++i) {
                 var emote = berryEmotes[i];
                 if(!isEmoteEligible(emote)) continue;
-                if ($.isArray(emote[searchField])) {
-                    for (var j = 0; j < emote[searchField].length; ++j) {
-                        if (emote[searchField][j].match(shittyDrunkenRegex)) {
-                            searchResults.push(emote.id);
-                            break;
-                        }
-                    }
-                }
-                else {
-                    if (emote[searchField].match(shittyDrunkenRegex)) {
-                        searchResults.push(emote.id);
-                    }
-                }
-            }
-
+				var negated = false;
+				for(var k=0;k<srs.length;++k) {
+					var match = emote.sr.match(srs[k].sdr) || [];
+					if(match.length != srs[k].match) {
+						negated = true;
+					}
+				}
+				if(negated) continue;
+				if(tags.length && (!emote.tags || !emote.tags.length)) continue;
+				if(emote.tags && tags.length) {
+					for(var j=0;j<tags.length;++j) {
+						var tagSearch = tags[j];
+						var match = false;
+						for(var k=0;k<emote.tags.length;++k) {
+							var tag = emote.tags[k];
+							var tagMatch = tag.match(tagSearch.sdr) || [];
+							if(tagMatch.length){
+								match = true;
+							}
+						}
+						if(match != tagSearch.match) {
+							negated = true;
+							break;
+						}
+					}
+				}
+				if(negated) continue;
+				if(terms.length) {
+					for(var j=0;j<terms.length;++j) {
+						var term = terms[j];
+						var match = false;
+						for(var k=0;k<emote.names.length;++k) {
+							var name = emote.names[k];
+							if(name.match(term.exact)) {
+								scores[i] = (scores[i] || 0.0) + 3;
+								match = true;
+							} else if(name.match(term.prefix)) {
+								scores[i] = (scores[i] || 0.0) + 2;
+								match = true;
+							} else if(name.match(term.any)) {
+								scores[i] = (scores[i] || 0.0) + 1;
+								match = true;
+							}
+						}
+						for(var k=0;k<emote.tags.length;k++) {
+							var tag = emote.tags[k];
+							if(tag.match(term.exact)) {
+								scores[i] = (scores[i] || 0.0) + 0.3;
+								match = true;
+							} else if(tag.match(term.prefix)) {
+								scores[i] = (scores[i] || 0.0) + 0.2;
+								match = true;
+							} else if(tag.match(term.any)) {
+								scores[i] = (scores[i] || 0.0) + 0.1;
+								match = true;
+							}
+						}
+						if(!match) {
+							delete scores[i];
+							negated = true;
+							break;
+						} 
+					}
+					if(negated) continue;
+					if (berryEmotesDebug) console.log('Matched emote, score: ', emote, scores[i]);
+				} else {
+					scores[i] = 0;
+				}
+            }			
+			for(var id in scores){
+				searchResults.push(id);
+			}
+			searchResults.sort(function (a, b) {
+                return scores[b] - scores[a];
+            });
         }
         if (colour) {
             var colourSearchResults = [];
             distances = {};
-            for (var i = 0; i < searchResults.length; ++i) {
+            for (var i in searchResults) {
                 var l1 = colour.l;
                 var a1 = colour.a;
                 var b1 = colour.b;
                 var colourDistance = 100000;
                 var emoteProminence;
-                var emoteColours = berryEmoteMappedColours[searchResults[i]];
+                var emoteColours = berryEmoteMappedColours[i];
                 if (!emoteColours) continue;
                 for (var j = 0; j < emoteColours.length; ++j) {
                     var l2 = emoteColours[j][0];
@@ -842,8 +923,8 @@ function showBerrymoteSearch() {
                 }
                 colourDistance = Math.sqrt(colourDistance);
                 if (colourDistance < maxColourDist) {
-                    distances[searchResults[i]] = colourDistance - (colourDistance * prominence * prominenceBoost);
-                    colourSearchResults.push(searchResults[i]);
+                    distances[i] = colourDistance - (colourDistance * prominence * prominenceBoost);
+                    colourSearchResults.push(i);
                 }
             }
             searchResults = colourSearchResults;
@@ -866,7 +947,7 @@ function showBerrymoteSearch() {
         else if (e.keyCode != 17) {
             searchTimer = setTimeout(function () {
                 berryEmoteSearch(0);
-            }, 250);
+            }, 400);
         }
     });
     $colourBox.keyup(function (e) {
@@ -878,7 +959,7 @@ function showBerrymoteSearch() {
         else if (e.keyCode != 17) {
             searchTimer = setTimeout(function () {
                 berryEmoteSearch(0);
-            }, 250);
+            }, 400);
         }
     });
 
