@@ -40,6 +40,9 @@ folder_regex = re.compile('(.)\.thumbs.redditmedia.com')
 colour_data_file = open('colour_data.txt', 'rb')
 colour_data = loads(colour_data_file.read())
 colour_data_file.close()
+tags_data_file = open('data.js', 'rb')
+tags_data = loads(tags_data_file.read())
+tags_data_file.close()
 
 def download_image(image_url):
     for i in range(0, 5):
@@ -162,9 +165,17 @@ def scrape():
             emote['names'] = [a[0].encode('ascii', 'ignore') for a in group]
             for name in emote['names']:
                 meta_data = next((x for x in emote_info if x['name'] == name), None)
+                tag_data = None
+                if name in tags_data:
+                    tag_data = tags_data[name]
                 if meta_data:
                     emote.update(meta_data)
                     break
+                if tag_data:
+                    print "Tagging: {} with {}".format(name, tag_data)
+                    emote['tags'] = [k for k,v in tag_data['tags'].iteritems() if v['score'] >= 1]
+                    if 'specialTags' in tag_data:
+                        emote['tags'].extend(tag_data['specialTags'])
                 if subreddit in nsfw_subreddits:
                     emote['nsfw'] = True
             emote['sr'] = subreddit
