@@ -5,7 +5,7 @@ nsfw_subreddits = [
 image_blacklist = [
     "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
     "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
-	"http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
+    "http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
     "http://c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png"
 ]
 
@@ -24,7 +24,7 @@ subreddits = [
     "berrytubelounge",
     "berrytubetf2",
     "bigmacintosh",
-	"chakolateemotes",
+    "chakolateemotes",
     "clopclop",
     "cloudchasermotes",
     "cuttershy",
@@ -106,6 +106,7 @@ subreddits = [
     "ploungemafia",
     "ponyanarchism",
     "ponyloungerts",
+    "rarity",
     "roseluck",
     "rubypinch",
     "sapphirestone",
@@ -115,14 +116,15 @@ subreddits = [
     "stalliongrad",
     "surprise",
     "tacoshy",
+    "taviquisition",
     "tbpimagedump",
     "tbpimagedump2",
     "thanksblueshift",
     "thebestpony",
     "themirishponies",
+    "twidashemotes",
     "twilightsparkle",
     "vinylscratch",
-    "rarity"
 ]
 
 emote_info = [
