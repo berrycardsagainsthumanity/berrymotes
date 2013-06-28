@@ -33,7 +33,7 @@ http_conn = opener.open(req, urllib.urlencode(formdata))
 http_conn.close()
 rules_we_care_about = ['width', 'height', 'background-image', 'background-position']
 
-emote_regex = re.compile('a\[href[|^]?=["\']/([\w:]+)["\']\](:hover)?')
+emote_regex = re.compile('a\[href[|^$]?=["\']/([\w:]+)["\']\](:hover)?')
 # https://s3.amazonaws.com/b.thumbs.redditmedia.com/9NANMOSLqQcBxhMs.png
 folder_regex = re.compile('(.)\.thumbs.redditmedia.com')
 
@@ -82,12 +82,15 @@ def extract_colours_from_emote(emote, bgimage):
             y = height * y / 100
     cropped = bgimage.crop((x, y, x + width, y + height))
     name = max(emote['names'], key=len)
-    if not os.path.exists('../single_emotes/{}'.format(emote['sr'])):
-        os.makedirs('../single_emotes/{}'.format(emote['sr']))
-    if not os.path.exists('../single_emotes/{}/{}.png'.format(emote['sr'], name)):
-        out_image = open('../single_emotes/{}/{}.png'.format(emote['sr'], name), 'wb')
-        cropped.save(out_image)
-        out_image.close()
+    try:
+        if not os.path.exists('../single_emotes/{}'.format(emote['sr'])):
+            os.makedirs('../single_emotes/{}'.format(emote['sr']))
+        if not os.path.exists('../single_emotes/{}/{}.png'.format(emote['sr'], name)):
+            out_image = open('../single_emotes/{}/{}.png'.format(emote['sr'], name), 'wb')
+            cropped.save(out_image)
+            out_image.close()
+    except Exception as ex:
+        print "Failed to save single_image: {}".format(ex)
     palette = extract_colors(cropped, min_prominence=0.01, min_distance=20)
     print "Found colours: {} for {}".format(','.join(rgb_to_hex(c.value) for c in palette.colors), name)
     return_colours = []

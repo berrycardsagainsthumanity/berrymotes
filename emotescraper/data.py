@@ -24,6 +24,9 @@ subreddits = [
     "berrytubelounge",
     "berrytubetf2",
     "bigmacintosh",
+    "bonquisition",
+    "Braeburnquisition",
+    "btmodminmotes",
     "chakolateemotes",
     "clopclop",
     "cloudchasermotes",
@@ -33,12 +36,14 @@ subreddits = [
     "desktopponies",
     "falloutequestria",
     "flitter",
+    "Flutquisition",
     "flutterlounge",
     "futemotes",
     "gallopfrey",
     "himntor",
     "idliketobeatree",
     "ilovedashie",
+    "isthisanemoteyet",
     "lyra",
     "minuette",
     "mlas1animotes",
@@ -106,7 +111,9 @@ subreddits = [
     "ploungemafia",
     "ponyanarchism",
     "ponyloungerts",
+    "pwettypwinkpwincesses",
     "rarity",
+    "redtoxinemotes",
     "roseluck",
     "rubypinch",
     "sapphirestone",
@@ -122,7 +129,7 @@ subreddits = [
     "thanksblueshift",
     "thebestpony",
     "themirishponies",
-    "twidashemotes",
+    "twidashmotes",
     "twilightsparkle",
     "vinylscratch",
 ]
@@ -334,6 +341,18 @@ emote_info = [
     },
     {
         'name': 'lyrapenisdoubt',
+        'nsfw': True
+    },
+    {
+        'name': 'twilightstrapkle',
+        'nsfw': True
+    },
+    {
+        'name': 'shakedatassmatt',
+        'nsfw': True
+    },
+    {
+        'name': 'braetavia',
         'nsfw': True
     },
 ]

@@ -221,11 +221,11 @@ function applyAnimation(emote, $emote) {
 }
 
 function wrapEmoteHeight($emote, height) {
-    var offset = (height-$emote.height())/2;
+    var offset = Math.floor((height-$emote.height())/2);
     $emote.wrap('<span class="rotation-wrapper" />').parent().css({
         'height': Math.ceil(height - offset),
         'display': 'inline-block',
-        'margin-top': Math.floor(offset),
+        'margin-top': offset,
         'position': 'relative'});
 }
 
@@ -262,6 +262,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
         outerWrap.css('display', 'inline-block');
         outerWrap.css('position', 'relative');
         innerWrap.css('transform', ['scale(', scale, ', ', scale, ')'].join(''));
+        innerWrap.css('-webkit-transform', ['scale(', scale, ', ', scale, ')'].join(''));
         innerWrap.css('transform-origin', 'left top');
         innerWrap.css('position', 'absolute');
         innerWrap.css('top', '0');
@@ -389,7 +390,7 @@ function postEmoteEffects(message, isSearch, ttl, username) {
                 }
                 if (berryEnableBrody && (flags[i] == 'brody')) {
                     animations.push('brody  1.27659s infinite ease');
-                    var brody_height = $emote.width()*Math.sin(10*Math.PI/180) + $emote.height()*Math.cos(10*Math.PI/180);
+                    var brody_height = 1.01*($emote.width()*Math.sin(10*Math.PI/180) + $emote.height()*Math.cos(10*Math.PI/180));
                     wrapEmoteHeight($emote, brody_height);
                 }
             }
