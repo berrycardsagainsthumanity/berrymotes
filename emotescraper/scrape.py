@@ -37,12 +37,17 @@ emote_regex = re.compile('a\[href[|^$]?=["\']/([\w:]+)["\']\](:hover)?')
 # https://s3.amazonaws.com/b.thumbs.redditmedia.com/9NANMOSLqQcBxhMs.png
 folder_regex = re.compile('(.)\.thumbs.redditmedia.com')
 
-colour_data_file = open('colour_data.txt', 'rb')
-colour_data = loads(colour_data_file.read())
-colour_data_file.close()
-tags_data_file = open('data.js', 'rb')
-tags_data = loads(tags_data_file.read())
-tags_data_file.close()
+colour_data = {}
+if os.path.exists('colour_data.txt'):
+    colour_data_file = open('colour_data.txt', 'rb')
+    colour_data = loads(colour_data_file.read())
+    colour_data_file.close()
+
+tags_data = {}
+if os.path.exists('data.js'):
+    tags_data_file = open('data.js', 'rb')
+    tags_data = loads(tags_data_file.read())
+    tags_data_file.close()
 
 def download_image(image_url):
     for i in range(0, 5):
@@ -61,10 +66,11 @@ def download_image(image_url):
 
 def get_checked_images():
     checked_images = []
-    checked_images_file = open('checked_images.txt', 'rb')
-    for line in checked_images_file:
-        checked_images.append(line.strip('\n'))
-    checked_images_file.close()
+    if os.path.exists('checked_images.txt'):
+        checked_images_file = open('checked_images.txt', 'rb')
+        for line in checked_images_file:
+            checked_images.append(line.strip('\n'))
+        checked_images_file.close()
     return checked_images
 
 
