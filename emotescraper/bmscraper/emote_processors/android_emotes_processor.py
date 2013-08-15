@@ -13,7 +13,7 @@
 from .basic_emotes_processor import BasicEmotesProcessorFactory, BasicEmotesProcessor
 from .apngcheck import APNGCheck
 import os
-from subprocess import call
+from subprocess import check_call
 from shutil import copyfile
 from glob import glob
 from PIL import Image
@@ -71,27 +71,40 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
                         pass 
         
                 copyfile(image_file, apng_file)
-            call(['apngdis', apng_file, 'frame_'])
+                
+            FNULL = open(os.devnull, 'wb')
+            check_call(['apngdis', apng_file, 'frame_'], stdout=FNULL)
+            FNULL.close()
             
             frames = sorted(glob(os.path.sep.join([os.path.dirname(apng_file), 'frame_*.png'])))
-            delays = sorted(glob(os.path.sep.join([os.path.dirname(apng_file), 'frame_*.txt'])))
+            delay_files = sorted(glob(os.path.sep.join([os.path.dirname(apng_file), 'frame_*.txt'])))
             assert len(frames) > 0, 'No frames found'
-            assert len(frames) == len(delays), 'number of frames does not match delays'
+            
+            delays = {}            
+            default_delay = self._calculate_delay(delay_files[0])
+            for delay_file in delay_files:
+                delays[os.path.splitext(delay_file)[0] + '.png'] = self._calculate_delay(delay_file)
             
             for idx, frame in enumerate(frames):
                 apng = {}
                 apng['index'] = idx
                 apng['image'] = Image.open(frame)
                 
-                # Calucate delay in ms
-                f = open(delays[idx], 'rb')
-                delay_text = f.readline().strip()[6:]
-                f.close()                
-                apng['delay'] = int(round(float(delay_text[0:delay_text.index('/')]) / float(delay_text[delay_text.index('/') + 1:]) * 1000))
+                if delays.has_key(frame):                         
+                    apng['delay'] = delays[frame]
+                else:
+                    logger.warning('No delay found for "%s", using default ($s ms)', frame, default_delay)
+                    apng['delay'] = default_delay
                 
                 self._apng_frames.append(apng)
-                 
                   
+    def _calculate_delay(self, delay_file):
+        # Calucate delay in ms
+        f = open(delay_file, 'rb')
+        delay_text = f.readline().strip()[6:]
+        f.close()       
+        
+        return int(round(float(delay_text[0:delay_text.index('/')]) / float(delay_text[delay_text.index('/') + 1:]) * 1000))
         
     def process_emote(self, emote):
         if self.is_apng(self.image_data):
