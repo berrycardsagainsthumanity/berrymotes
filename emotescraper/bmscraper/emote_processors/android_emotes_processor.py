@@ -147,6 +147,6 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
             emote_url = '{}/{}.png'.format(emote['sr'], max(emote['names'], key=len))
             for name in emote['names']:
                 with self.scraper.mutex:
-                    self._emotes[name] = {'images': {'image': emote_url}, 
+                    self._emotes[name] = {'images': [{'image': emote_url}], 
                                           'apng': False,
                                           'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}    
