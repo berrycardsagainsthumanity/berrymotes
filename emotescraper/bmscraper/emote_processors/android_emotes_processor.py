@@ -114,7 +114,7 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
                 cropped = self.extract_single_image(emote, frame['image'])
                 
                 file_name = self._single_emotes_filename_apng.format(emote['sr'], max(emote['names'], key=len), frame['index'])
-                emote_url = '{}/{}_{:0>3}.png'.format(emote['sr'], max(emote['names'], key=len), frame['index'])
+                emote_url = '{}/{}_frame_{:0>3}.png'.format(emote['sr'], max(emote['names'], key=len), frame['index'])
                 
                 try:
                     if not os.path.exists(file_name):
