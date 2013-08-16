@@ -11,7 +11,7 @@
 # --------------------------------------------------------------------
 
 import logging
-logger = logging.basicConfig(level=logging.DEBUG)
+logger = logging.basicConfig(level=logging.WARN)
 
 from bmscraper import BMScraper, AndroidEmotesProcessorFactory
 from bmscraper.ratelimiter import TokenBucket

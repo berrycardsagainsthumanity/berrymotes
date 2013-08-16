@@ -90,10 +90,10 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
                 apng['index'] = idx
                 apng['image'] = Image.open(frame)
                 
-                if delays.has_key(frame):                         
+                if frame in delays:                         
                     apng['delay'] = delays[frame]
                 else:
-                    logger.warning('No delay found for "%s", using default ($s ms)', frame, default_delay)
+                    logger.warning('No delay found for "%s", using default (%s ms)', frame, default_delay)
                     apng['delay'] = default_delay
                 
                 self._apng_frames.append(apng)
@@ -132,19 +132,21 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
                     raise e
                 
                 image = {'image': emote_url,
-                         'apng': True,
                          'index': frame['index'],
                          'delay': frame['delay']}
                 images.append(image)
             
             for name in emote['names']:
                 with self.scraper.mutex:
-                    self._emotes[name] = images;
+                    self._emotes[name] = {'images': images,                                         
+                                          'apng': True,
+                                          'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}
             
         else:
             BasicEmotesProcessor.process_emote(self, emote)
             emote_url = '{}/{}.png'.format(emote['sr'], max(emote['names'], key=len))
             for name in emote['names']:
                 with self.scraper.mutex:
-                    self._emotes[name] = [{'image': emote_url, 
-                                           'apng':False}]    
+                    self._emotes[name] = {'images': {'image': emote_url}, 
+                                          'apng': False,
+                                          'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}    
