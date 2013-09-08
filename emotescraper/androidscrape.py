@@ -34,5 +34,5 @@ scraper.rate_limit_lock = TokenBucket(15, 30)
 scraper.scrape()
 
 f = gzip.open(os.path.join('..', 'single_emotes', 'emotes.json.gz'), 'wb')
-f.write(dumps(factory.emotes))
+f.write(dumps(factory.emotes, separators=(',', ': ')))
 f.close()

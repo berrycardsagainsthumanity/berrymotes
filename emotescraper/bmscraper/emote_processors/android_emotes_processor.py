@@ -17,9 +17,30 @@ from subprocess import check_call
 from shutil import copyfile
 from glob import glob
 from PIL import Image
+import hashlib
 
 import logging
 logger = logging.getLogger(__name__)
+
+def djb2(s):
+    """ See for details: http://www.cse.yorku.ca/~oz/hash.html """
+    
+    _hash = 5381
+    for i in xrange(0, len(s)):
+        _hash = (((_hash & 0x07ffffff) << 5) + _hash) + ord(s[i])
+
+    return _hash & 0xffffffff
+
+def hashfile(filepath, prefix=None):
+    sha1 = hashlib.sha1()
+    if prefix:
+        sha1.update(prefix)
+    f = open(filepath, 'rb')
+    try:
+        sha1.update(f.read())
+    finally:
+        f.close()
+    return sha1.hexdigest()
 
 class AndroidEmotesProcessorFactory(BasicEmotesProcessorFactory):
     def __init__(self, 
@@ -27,7 +48,7 @@ class AndroidEmotesProcessorFactory(BasicEmotesProcessorFactory):
                  apng_dir='images', 
                  apng_url='images/{}/{}'):
         BasicEmotesProcessorFactory.__init__(self, single_emotes_filename=single_emotes_filename)
-        self.emotes = {}
+        self.emotes = []
         self.singe_emotes_filename_apng = os.path.dirname(self.single_emotes_filename) + os.path.sep + '{}_frame_{:0>3}.png'
         
     def new_processor(self, scraper=None, image_url=None, group=None):
@@ -104,12 +125,19 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
         delay_text = f.readline().strip()[6:]
         f.close()       
         
-        return int(round(float(delay_text[0:delay_text.index('/')]) / float(delay_text[delay_text.index('/') + 1:]) * 1000))
+        return int(round(float(delay_text[0:delay_text.index('/')]) / float(delay_text[delay_text.index('/') + 1:]) * 1000))  
+    
+    def _hash_emote(self, emote):
+        s = emote['name'] + emote['image'] + ('T' if emote['apng'] else "F") + ('T' if emote['nsfw'] else "F")
+        if emote['apng']:
+            s += str(emote['index']) + '.' + str(emote['delay'])
+            
+        return djb2(s)
+        
         
     def process_emote(self, emote):
         if self.is_apng(self.image_data):
             logger.debug('Found apng image: %s', self._image_name)
-            images = []
             for frame in self._apng_frames:
                 cropped = self.extract_single_image(emote, frame['image'])
                 
@@ -127,26 +155,31 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
                         f = open(file_name, 'wb')
                         cropped.save(f)
                         f.close()
+                    
+                    
+                    a_emote = {'names': emote['names'],
+                               'image': emote_url,
+                               'hash': hashfile(file_name, '{}.{}'.format(frame['index'], frame['delay'])),
+                               'index': frame['index'],
+                               'delay': frame['delay'],
+                               'apng': True,
+                               'sr': emote['sr'],
+                               'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}
+                    with self.scraper.mutex:
+                        self._emotes.append(a_emote)
+                    
                 except Exception, e:
                     logger.exception(e)
                     raise e
-                
-                image = {'image': emote_url,
-                         'index': frame['index'],
-                         'delay': frame['delay']}
-                images.append(image)
-            
-            for name in emote['names']:
-                with self.scraper.mutex:
-                    self._emotes[name] = {'images': images,                                         
-                                          'apng': True,
-                                          'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}
             
         else:
             BasicEmotesProcessor.process_emote(self, emote)
             emote_url = '{}/{}.png'.format(emote['sr'], max(emote['names'], key=len))
-            for name in emote['names']:
-                with self.scraper.mutex:
-                    self._emotes[name] = {'images': [{'image': emote_url}], 
-                                          'apng': False,
-                                          'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}    
+            a_emote = {'names': emote['names'],
+                       'image': emote_url,
+                       'hash': hashfile(self.single_emotes_filename.format(emote['sr'], max(emote['names'], key=len)), '0.0'),
+                       'apng': False,
+                       'sr': emote['sr'],
+                       'nsfw': True if 'nsfw' in emote and emote['nsfw'] else False}
+            with self.scraper.mutex:
+                self._emotes.append(a_emote)
