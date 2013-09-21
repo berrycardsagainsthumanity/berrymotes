@@ -21,12 +21,14 @@ subreddits = [
     "applebloom",
     "applejack",
     "arborus",
+    "babsquisition",
     "beautybrass",
     "berrytubelounge",
     "berrytubetf2",
     "bigmacintosh",
     "bonquisition",
     "Braeburnquisition",
+    "BronyGaming",
     "btmodminmotes",
     "chakolateemotes",
     "clopclop",
@@ -35,6 +37,8 @@ subreddits = [
     "dashiemotes",
     "daylightemotes",
     "desktopponies",
+    "dumbrock",
+    "EquestriaGirls",
     "falloutequestria",
     "flitter",
     "Flutquisition",
@@ -82,6 +86,8 @@ subreddits = [
     "mylittlegooglyeyes",
     "mylittleicons",
     "mylittlekindle",
+    "mylittlekitchen",
+    "mylittlekurtis",
     "mylittlelistentothis",
     "mylittlelivestream",
     "mylittlemango",
@@ -97,6 +103,7 @@ subreddits = [
     "mylittlesh",
     "mylittlesports",
     "mylittlesquidward",
+    "mylittlestartrek",
     "mylittlesupportgroup",
     "mylittletacos",
     "mylittletwist",
@@ -113,6 +120,7 @@ subreddits = [
     "ponyanarchism",
     "ponyloungerts",
     "pwettypwinkpwincesses",
+    "Rainbowjackemotes",
     "rarity",
     "redtoxinemotes",
     "roseluck",
@@ -129,10 +137,12 @@ subreddits = [
     "tbpimagedump2",
     "thanksblueshift",
     "thebestpony",
+    "thepleasurehub",
     "themirishponies",
     "twidashmotes",
     "twilightsparkle",
     "vinylscratch",
+    "zponymotes",
 ]
 
 emote_info = [
@@ -356,4 +366,20 @@ emote_info = [
         'name': 'braetavia',
         'nsfw': True
     },
+    {
+        'name': 'thesaddestboner',
+        'nsfw': True
+    },
+    {
+        'name': 'breakitin',
+        'nsfw': True
+    },
+    {
+        'name': 'uwotm8',
+        'nsfw': True
+    },
+    {
+        'name': 'iwilldildoyou',
+        'nsfw': True
+    }
 ]
