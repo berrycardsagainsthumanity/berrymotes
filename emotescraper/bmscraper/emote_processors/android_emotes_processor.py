@@ -18,6 +18,7 @@ from shutil import copyfile
 from glob import glob
 from PIL import Image
 import hashlib
+from StringIO import StringIO
 
 import logging
 logger = logging.getLogger(__name__)
@@ -109,7 +110,10 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
             for idx, frame in enumerate(frames):
                 apng = {}
                 apng['index'] = idx
-                apng['image'] = Image.open(frame)
+                
+                f = open(frame, 'rb')
+                apng['image'] = f.read()
+                f.close()
                 
                 if frame in delays:                         
                     apng['delay'] = delays[frame]
@@ -139,7 +143,8 @@ class AndroidEmotesProcessor(BasicEmotesProcessor, APNGCheck):
         if self.is_apng(self.image_data):
             logger.debug('Found apng image: %s', self._image_name)
             for frame in self._apng_frames:
-                cropped = self.extract_single_image(emote, frame['image'])
+                image = Image.open(StringIO(frame['image']))
+                cropped = self.extract_single_image(emote, image)
                 
                 file_name = self._single_emotes_filename_apng.format(emote['sr'], max(emote['names'], key=len), frame['index'])
                 emote_url = '{}/{}_frame_{:0>3}.png'.format(emote['sr'], max(emote['names'], key=len), frame['index'])
