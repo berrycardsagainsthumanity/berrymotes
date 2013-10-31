@@ -22,6 +22,7 @@ subreddits = [
     "applejack",
     "arborus",
     "babsquisition",
+    "batquisition",
     "beautybrass",
     "berrytubelounge",
     "berrytubetf2",
@@ -33,6 +34,7 @@ subreddits = [
     "chakolateemotes",
     "clopclop",
     "cloudchasermotes",
+    "comeinside",
     "cuttershy",
     "dashiemotes",
     "daylightemotes",
@@ -49,6 +51,7 @@ subreddits = [
     "idliketobeatree",
     "ilovedashie",
     "isthisanemoteyet",
+    "littlecolt",
     "lyra",
     "minuette",
     "mlas1animotes",
@@ -119,6 +122,7 @@ subreddits = [
     "ploungemafia",
     "ponyanarchism",
     "ponyloungerts",
+    "ponymotes",
     "pwettypwinkpwincesses",
     "Rainbowjackemotes",
     "rarity",
@@ -381,5 +385,21 @@ emote_info = [
     {
         'name': 'iwilldildoyou',
         'nsfw': True
-    }
+    },
+    {
+        'name': 'twisockbutt',
+        'nsfw': True
+    },
+    {
+        'name': 'futashyaj',
+        'nsfw': True
+    },
+    {
+        'name': 'blueshaft',
+        'nsfw': True
+    },
+    {
+        'name': 'noponyhere',
+        'nsfw': True
+    },
 ]
