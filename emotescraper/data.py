@@ -35,6 +35,7 @@ subreddits = [
     "clopclop",
     "cloudchasermotes",
     "comeinside",
+    "commabombing",
     "cuttershy",
     "dashiemotes",
     "daylightemotes",
@@ -82,10 +83,12 @@ subreddits = [
     "mylittledaww",
     "mylittledota",
     "mylittledramaticstory",
+    "mylittledurian",
     "mylittlefalloutdiary",
     "mylittlefistfight",
     "mylittlefoodmanes",
     "mylittlefortress",
+    "mylittlefriends",
     "mylittlegooglyeyes",
     "mylittleicons",
     "mylittlekindle",
@@ -119,6 +122,7 @@ subreddits = [
     "pankakke",
     "pinkiepie",
     "pinkquisition",
+    "ploungeafterdark",
     "ploungemafia",
     "ponyanarchism",
     "ponyloungerts",
@@ -131,6 +135,7 @@ subreddits = [
     "rubypinch",
     "sapphirestone",
     "seriouslyluna",
+    "shadeschatlounge",
     "spaceclop",
     "speedingturtle",
     "stalliongrad",
@@ -146,6 +151,7 @@ subreddits = [
     "twidashmotes",
     "twilightsparkle",
     "vinylscratch",
+    "yaxim3",
     "zponymotes",
 ]
 
@@ -400,6 +406,42 @@ emote_info = [
     },
     {
         'name': 'noponyhere',
+        'nsfw': True
+    },
+    {
+        'name': 'chryshininglick',
+        'nsfw': True
+    },
+    {
+        'name': 'braerainbowsocks',
+        'nsfw': True
+    },
+    {
+        'name': 'bukkakebrae',
+        'nsfw': True
+    },
+    {
+        'name': 'milkydance',
+        'nsfw': True
+    },
+    {
+        'name': 'laughingcock',
+        'nsfw': True
+    },
+    {
+        'name': 'futatwishy',
+        'nsfw': True
+    },
+    {
+        'name': 'futajhelp',
+        'nsfw': True
+    },
+    {
+        'name': 'vinylbutt',
+        'nsfw': True
+    },
+    }
+        'name': 'doublebutts',
         'nsfw': True
     },
 ]
