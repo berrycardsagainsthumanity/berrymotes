@@ -440,7 +440,7 @@ emote_info = [
         'name': 'vinylbutt',
         'nsfw': True
     },
-    }
+    {
         'name': 'doublebutts',
         'nsfw': True
     },
