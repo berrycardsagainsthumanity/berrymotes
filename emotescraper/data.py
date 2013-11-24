@@ -66,6 +66,7 @@ subreddits = [
     "mlploungesteamgroup",
     "mlpvectors",
     "molestia",
+    "multihoofdrinking",
     "mylittleadventuretime",
     "mylittlealicorn",
     "mylittlealcoholic",
@@ -442,6 +443,10 @@ emote_info = [
     },
     {
         'name': 'doublebutts',
+        'nsfw': True
+    },
+    {
+        'name': 'futhelp',
         'nsfw': True
     },
 ]
