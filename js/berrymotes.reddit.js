@@ -1,0 +1,1 @@
+Bem.injectEmoteButton('.usertext-buttons');

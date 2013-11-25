@@ -1,0 +1,33 @@
+{
+    "name": "Berrymotes",
+    "version": "0.1",
+    "manifest_version": 2,
+    "description": "PONIES AND EMOTES",
+    "update_url": "http://berrymotes.com/update-chrome.php",
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": [
+                "BabelExt.js",
+                "jquery-1.8.2.js",
+                "jquery-ui-1.9.1.custom.js",
+                "apng-canvas.min.js",
+                "berrymotes.webkit.invert.js",
+                "berrymotes.global.js",
+                "berrymotes.core.js"
+            ]
+        }
+    ],
+    "icons": {
+        "48": "48.png",
+        "128": "128.png"
+    },
+    "permissions": [
+    ]
+}
