@@ -41,6 +41,7 @@ subreddits = [
     "daylightemotes",
     "desktopponies",
     "dumbrock",
+    "dumbtoxin",
     "EquestriaGirls",
     "falloutequestria",
     "flitter",
@@ -449,4 +450,20 @@ emote_info = [
         'name': 'futhelp',
         'nsfw': True
     },
+    {
+        'name': 'PonisEnvy',
+        'nsfw': True
+    },
+    {
+        'name': 'CanisEnvy',
+        'nsfw': True
+    },
+    {
+        'name': 'cane',
+        'nsfw': True
+    },
+    {
+        'name': 'nudity',
+        'nsfw': True
+    }
 ]
