@@ -1,0 +1,279 @@
+Bem = typeof Bem === "undefined" ? {} : Bem;
+Bem.jQuery = jQuery;
+
+var berrytube_settings_schema = [
+    { key: 'drunkMode', type: "bool", default: false },
+    { key: 'effectTTL', type: "int", default: 20 }
+];
+
+Bem.loggingIn = false;
+
+Bem.berrySiteInit = function () {
+    Bem.loadSettings(berrytube_settings_schema, function () {
+        Bem.monkeyPatchChat();
+        Bem.monkeyPatchPoll();
+        Bem.monkeyPatchTabComplete();
+        Bem.injectEmoteButton('#chatControls');
+        window.onbeforeunload = function () {
+            if (Bem.drunkMode && !Bem.loggingIn) {
+                return "Are you sure you want to navigate away?";
+            }
+            // not in drunk mode, just let it happen.
+            return null;
+        };
+        $('form').submit(function () {
+            Bem.loggingIn = true;
+        });
+    });
+};
+
+// [name] is the name of the event "click", "mouseover", ..
+// same as you'd pass it to bind()
+// [fn] is the handler function
+$.fn.bindFirst = function (name, fn) {
+    // bind as you normally would
+    // don't want to miss out on any jQuery magic
+    this.on(name, fn);
+
+    // Thanks to a comment by @Martin, adding support for
+    // namespaced events too.
+    this.each(function () {
+        var handlers = $._data(this, 'events')[name.split('.')[0]];
+        // take out the handler we just inserted from the end
+        var handler = handlers.pop();
+        // move it at the beginning
+        handlers.splice(0, 0, handler);
+    });
+};
+
+function marmReactiveMode() {
+    if (Bem.debug)
+        $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.staging.css" />');
+    else
+        $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.css" />');
+
+    var pollpane = $('#pollpane');
+    $('#pollControl').appendTo(pollpane);
+    var pollClose = $('<div class="close"></div>');
+    pollpane.prepend(pollClose);
+    pollClose.click(function () {
+        pollpane.hide();
+    });
+
+    var showPollpane = function () {
+        pollpane.show();
+    };
+
+    whenExists('#chatControls', function () {
+        if (Bem.debug) console.log('Injecting poll button.');
+        var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Poll");
+        menu.css('margin-right', '2px');
+        menu.css('background', 'none');
+        menu.click(function () {
+            showPollpane();
+        });
+    });
+
+    var playlist = $('#leftpane');
+    var playlistClose = $('<div class="close"></div>');
+    playlist.prepend(playlistClose);
+    playlistClose.click(function () {
+        playlist.hide();
+    });
+
+    $(window).bindFirst('keydown', function (event) {
+        if (event.keyCode == 27) {
+            playlist.hide();
+            return true;
+        }
+        if (!(event.keyCode == 70 && event.ctrlKey)) return true;
+        event.preventDefault();
+        playlist.show();
+        return false;
+    });
+
+    whenExists('#chatControls', function () {
+        if (Bem.debug) console.log('Injecting playlist button.');
+        var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Playlist");
+        menu.css('margin-right', '2px');
+        menu.css('background', 'none');
+        menu.click(function () {
+            playlist.show();
+            smartRefreshScrollbar();
+            realignPosHelper();
+            if (getCookie("plFolAcVid") == "1") {
+                var x = ACTIVE.domobj.index();
+                x -= 2;
+                if (x < 0) x = 0;
+                scrollToPlEntry(x);
+            }
+        });
+    });
+
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        $("head").append('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>');
+    }
+    Bem.whenExists('#chatControls', function () {
+        if (NAME) {
+            $('#headbar').hide();
+        }
+    });
+}
+
+Bem.monkeyPatchChat = function () {
+    var oldAddChatMsg = addChatMsg;
+    addChatMsg = function (data, _to) {
+        var applyEmotes = berryEmotesEnabled && data.msg.msg.match(berryEmoteRegex);
+        if (applyEmotes) {
+            data.msg.msg = Bem.applyEmotesToStr(data.msg.msg);
+        }
+        Bem.effectStack = $.grep(Bem.effectStack, function (effectEmote, i) {
+            effectEmote["ttl"] -= 1;
+            if (effectEmote["ttl"] >= 0) {
+                return true; // keep the element in the array
+            }
+            else {
+                effectEmote["$emote"].css("animation", "none");
+                return false;
+            }
+        });
+        oldAddChatMsg.apply(this, arguments);
+        if (applyEmotes) {
+            var chatMessage = $(_to).children(':last-child');
+            Bem.postEmoteEffects(chatMessage, false, berryEmoteEffectTTL, data.msg.nick);
+        }
+    }
+};
+
+Bem.monkeyPatchPoll = function () {
+    var oldPoll = newPoll;
+    newPoll = function (data) {
+        if (Bem.enabled) {
+            for (var i = 0; i < data.options.length; ++i) {
+                // workaround so we don't conflict with BPM
+                data.options[i] = data.options[i].replace(berryEmoteRegex, '\\\\$1$2$3');
+            }
+        }
+        oldPoll(data);
+        if (Bem.enabled) {
+            var poll = $('.poll.active');
+            var options = poll.find('div.label, .title');
+            $.each(options, function (i, option) {
+                var $option = $(option);
+                if (Bem.debug) console.log(option);
+                var t = $option.text().replace(">", "&gt;").replace("<", "&lt;");
+                t = t.replace(/\\\\([\w-]+)/i, '[](/$1)');
+                t = Bem.applyEmotesToStr(t);
+                $option.html(t);
+                Bem.postEmoteEffects($option);
+            });
+        }
+    }
+};
+
+Bem.monkeyPatchTabComplete = function () {
+    var oldTabComplete = tabComplete;
+    tabComplete = function (elem) {
+        var chat = elem.val();
+        var ts = elem.data('tabcycle');
+        var i = elem.data('tabindex');
+        var hasTS = false;
+
+        if (typeof ts != "undefined" && ts != false) hasTS = true;
+
+        if (hasTS == false) {
+            console.log("New Tab");
+            var endword = /\\\\([^ ]+)$/i;
+            var m = chat.match(endword);
+            if (m) {
+                var emoteToComplete = m[1];
+                if (Bem.debug) console.log('Found emote to tab complete: ', emoteToComplete)
+            } else {
+                return oldTabComplete(elem);
+            }
+
+            var re = new RegExp('^' + emoteToComplete + '.*', 'i');
+
+            var ret = [];
+            for (var i in Bem.map) {
+                if (isEmoteEligible(berryEmotes[Bem.map[i]])) {
+                    var m = i.match(re);
+                    if (m) ret.push(m[0]);
+                }
+            }
+            ret.sort();
+
+            if (ret.length == 1) {
+                var x = chat.replace(endword, '\\\\' + ret[0]);
+                elem.val(x);
+            }
+            if (ret.length > 1) {
+                var ts = [];
+                for (var i in ret) {
+                    var x = chat.replace(endword, '\\\\' + ret[i]);
+                    ts.push(x);
+                }
+                elem.data('tabcycle', ts);
+                elem.data('tabindex', 0);
+                hasTS = true;
+                console.log(elem.data());
+            }
+        }
+
+        if (hasTS == true) {
+            console.log("Cycle");
+            var ts = elem.data('tabcycle');
+            var i = elem.data('tabindex');
+            elem.val(ts[i]);
+            if (++i >= ts.length) i = 0;
+            elem.data('tabindex', i);
+        }
+
+        return ret
+    };
+};
+
+Bem.siteSettings = function (configOps) {
+    //----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Drunk mode (prevents accidental navigation): ").appendTo(row);
+    var drunkMode = $('<input/>').attr('type', 'checkbox').appendTo(row);
+    if (Bem.drunkMode) drunkMode.attr('checked', 'checked');
+    drunkMode.change(function () {
+        var enabled = $(this).is(":checked");
+        Bem.drunkMode = enabled;
+        Bem.settings.set('drunkMode', enabled);
+    });
+    //----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    $('<span/>').text("Max chat lines to keep effects running on (saves CPU):").appendTo(row);
+    var chatTTL = $('<input/>').attr('type', 'text').val(berryEmoteEffectTTL).addClass("small").appendTo(row);
+    chatTTL.css('text-align', 'center');
+    chatTTL.css('width', '30px');
+    chatTTL.keyup(function () {
+        Bem.effectTTL = chatTTL.val();
+        Bem.settings.set('effectTTL', chatTTL.val());
+    });
+    //----------------------------------------
+    row = $('<div/>').appendTo(configOps);
+    var refresh = $('<button>Refresh Data</button>').appendTo(row);
+    refresh.click(function () {
+        Bem.dataRefresh();
+    });
+};
+
+Bem.settings = {
+    get: function (key, callback) {
+        var val = localStorage.getItem(key);
+        callback(key);
+    },
+    set: function (key, val, callback) {
+        localStorage.setItem(key, val);
+        if (callback) callback();
+    }
+};
+
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'http://backstage.berrytube.tv/marminator/berrymotes.core.js';
+document.body.appendChild(script);
