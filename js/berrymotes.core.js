@@ -78,11 +78,11 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             if (emoteId !== undefined) {
                 var emote = Bem.emotes[emoteId];
                 if (Bem.isEmoteEligible(emote)) {
-                    var emoteCode = Bem.getEmoteHtml(emote, match[2]);
+                    var emoteCode = Bem.getEmoteHtml(emote, match[2], match[3]);
                     //if (Bem.debug) console.log('Emote code: ' + emoteCode);
                     var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(', match[3] , ')\\)'].join(''), 'gi');
                     //if (Bem.debug) console.log('Replace regex: ', replace_regex);
-                    str = str.replace(replace_regex, emoteCode + '$2');
+                    str = str.replace(replace_regex, emoteCode);
                 }
             }
         }
@@ -97,7 +97,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         if (emoteId) {
             var $a = $(a);
             var emote = Bem.emotes[emoteId];
-            var emoteCode = Bem.getEmoteHtml(emote, href.join('-'));
+            var emoteCode = Bem.getEmoteHtml(emote, href.join('-'), a.innerHTML);
             var emoteDom = $("<span>" + emoteCode + "</span>");
             $a.replaceWith(emoteDom);
             Bem.postEmoteEffects(emoteDom, false);
@@ -180,7 +180,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         }
     };
 
-    Bem.getEmoteHtml = function (emote, flags) {
+    Bem.getEmoteHtml = function (emote, flags, altText) {
         return ['<span class="berryemote',
             emote.height > Bem.maxEmoteHeight ? ' resize' : '',
             Bem.apngSupported == false && emote.apng_url ? ' canvasapng' : '',
@@ -192,7 +192,8 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             'display:inline-block; ',
             'position: relative; overflow: hidden;', '" ',
             'flags="', flags, '" ',
-            'emote_id="', emote.id , '"></span>'
+            'emote_id="', emote.id , '">', altText || "" , '</span>'
+
         ].join('');
     };
 
@@ -211,7 +212,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         APNG.createAPNGCanvas(emote.apng_url, function (canvas) {
             var position = (emote['background-position'] || ['0px', '0px']);
             var $canvas = $(canvas);
-            $emote.append(canvas);
+            $emote.prepend(canvas);
             $canvas.css('position', 'absolute');
             $canvas.css('left', position[0]);
             $canvas.css('top', position[1]);
@@ -990,7 +991,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             }
         }
 
-        if(location.hostname == "gmiegnmgindbinjikakekghnpdhflooc") {
+        if (location.hostname == "gmiegnmgindbinjikakekghnpdhflooc") {
             load = false;
             Bem.showBerrymoteConfig();
         }

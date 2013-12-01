@@ -11,7 +11,7 @@ Bem.berrySiteInit = function () {
                     var addedNodes = $(mutations[i].addedNodes);
 
                     if (location.hostname == 'www.reddit.com') {
-                        var emotes = addedNodes.find('a[href^="/"]:empty:not([id])');
+                        var emotes = addedNodes.find('a[href^="/"]:not([id])');
                         emotes.each(function (i, emote) {
                             Bem.applyEmotesToAnchor(this);
                         });
@@ -39,7 +39,7 @@ Bem.berrySiteInit = function () {
         });
 
         if (location.hostname == 'www.reddit.com') {
-            $('a[href^="/"]:empty:not([id])').each(function () {
+            $('a[href^="/"]:not([id])').each(function () {
                 $(this).prev('.keyNavAnnotation').remove();
                 Bem.applyEmotesToAnchor(this);
             });
