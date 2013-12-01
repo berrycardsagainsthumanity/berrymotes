@@ -4,6 +4,7 @@
     "manifest_version": 2,
     "description": "PONIES AND EMOTES",
     "update_url": "http://berrymotes.com/update-chrome.php",
+    "options_page": "settings.html",
     "background": {
         "scripts": ["background.js"]
     },

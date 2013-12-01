@@ -1,4 +1,3 @@
-console.log('Bemr motes', $);
 Bem = typeof Bem === "undefined" ? {} : Bem;
 Bem.jQuery = jQuery.noConflict(true);
 
@@ -11,10 +10,16 @@ Bem.berrySiteInit = function () {
                 if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
                     var addedNodes = $(mutations[i].addedNodes);
 
-                    var emotes = addedNodes.find('a[href^="/"]:empty:not([id])');
-                    emotes.each(function (i, emote) {
-                        Bem.applyEmotesToAnchor(this);
-                    });
+                    if (location.hostname == 'www.reddit.com') {
+                        var emotes = addedNodes.find('a[href^="/"]:empty:not([id])');
+                        emotes.each(function (i, emote) {
+                            Bem.applyEmotesToAnchor(this);
+                        });
+                        var buttonPanes = addedNodes.find('.commentarea .bottom-area .usertext-buttons');
+                        for(var j = 0; j < buttonPanes.length; ++j){
+                            Bem.injectEmoteButton(buttonPanes[j]);
+                        }
+                    }
 
                     for (var j = 0; j < addedNodes.length; ++j) {
                         var node = addedNodes[j];
@@ -22,7 +27,7 @@ Bem.berrySiteInit = function () {
                     }
 
                 } else if (mutations[i].type === "characterData") {
-                    Bem.applyEmotesToTextNode(mutations[i].target.parentNode);
+                    Bem.applyEmotesToTextNode(mutations[i].target);
                 }
             }
         };
@@ -33,10 +38,16 @@ Bem.berrySiteInit = function () {
             characterData: true
         });
 
-        $('a[href^="/"]:empty:not([id])').each(function () {
-            $(this).prev('.keyNavAnnotation').remove();
-            Bem.applyEmotesToAnchor(this);
-        });
+        if (location.hostname == 'www.reddit.com') {
+            $('a[href^="/"]:empty:not([id])').each(function () {
+                $(this).prev('.keyNavAnnotation').remove();
+                Bem.applyEmotesToAnchor(this);
+            });
+            var buttonPanes = $('.commentarea .bottom-area .usertext-buttons');
+            for(var j = 0; j < buttonPanes.length; ++j){
+                Bem.injectEmoteButton(buttonPanes[j]);
+            }
+        }
 
         function handleText(node) {
             Bem.applyEmotesToTextNode(node);
@@ -68,15 +79,16 @@ Bem.berrySiteInit = function () {
 };
 
 Bem.settings = {
-    get: function(key, callback){
-        var cb = function(data){
+    get: function (key, callback) {
+        var cb = function (data) {
             callback(data.value);
         };
         return BabelExt.storage.get(key, cb);
     },
-    set: function(key, val, callback){
-        if(!callback) callback = function() {};
-        BabelExt.storage.set(key, ""+val, callback);
+    set: function (key, val, callback) {
+        if (!callback) callback = function () {
+        };
+        BabelExt.storage.set(key, "" + val, callback);
     }
 };
 

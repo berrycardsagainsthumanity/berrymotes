@@ -15,7 +15,11 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         { key: 'enableRotate', type: "bool", default: true },
         { key: 'enableBrody', type: "bool", default: true },
         { key: 'enableInvert', type: "bool", default: true },
-        { key: 'blacklist', type: "string_array", default: [] }
+        { key: 'blacklist', type: "string_array", default: [] },
+        { key: 'enableSiteBlacklist', type: "bool", default: false },
+        { key: 'enableSiteWhitelist', type: "bool", default: true },
+        { key: 'siteWhitelist', type: "string_array", default: ['www.reddit.com'] },
+        { key: 'siteBlacklist', type: "string_array", default: [] }
     ];
 
     Bem.loadSettings = function (settings, callback) {
@@ -39,12 +43,11 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                         else val = item.default;
                         break;
                     case "string_array":
-                        if(!val) val = item.default;
+                        if (!val) val = item.default;
                         else val = val.split(/[\s,]+/);
                         break;
                 }
                 Bem[item.key] = val;
-                console.log("Setting: ", item.key, " to ", val);
                 cbCounter();
             };
             Bem.settings.get(item.key, cb);
@@ -118,10 +121,11 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         'div',
         'em',
         'form',
-        'h1', 'h2','h3','h4','h5','h6',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'i',
         'label',
         'li',
+        'marquee',
         'p',
         'pre',
         'q',
@@ -144,11 +148,35 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             textNode.nodeValue.search(Bem.emoteRegex) >= 0 &&
             textNode.parentNode.nodeName &&
             Bem.nodeTypeWhitelist.indexOf(textNode.parentNode.nodeName.toLowerCase()) >= 0) {
-            textNode = $(textNode.parentNode);
-            var emoteHtml = Bem.applyEmotesToStr(textNode.text());
-            if (Bem.debug) console.log("emote html: ", emoteHtml);
-            textNode.html(emoteHtml);
-            Bem.postEmoteEffects(textNode);
+            var match;
+            var str = textNode.nodeValue;
+            var emoteLocations = [];
+            while (match = Bem.emoteRegex.exec(str)) {
+                var emoteId = Bem.map[match[1]];
+                if (emoteId !== undefined) {
+                    var emote = Bem.emotes[emoteId];
+                    if (Bem.isEmoteEligible(emote)) {
+                        emoteLocations.push({
+                            start: match.index,
+                            replace_length: match[0].length,
+                            emote_html: Bem.getEmoteHtml(emote, match[2]),
+                            alt_text: match[3]});
+                    }
+                }
+            }
+            var parent = textNode.parentNode;
+            for (var i = emoteLocations.length - 1; i >= 0; i--) {
+                var loc = emoteLocations[i];
+                var newTextNode = textNode.splitText(loc.start);
+                newTextNode.deleteData(0, loc.replace_length);
+                if (loc.alt_text) {
+                    newTextNode.insertData(0, " " + loc.alt_text);
+                }
+                var emote_node = $(loc.emote_html);
+                //if(Bem.debug) console.log(loc.emote_html);
+                parent.insertBefore(emote_node.get(0), newTextNode);
+            }
+            Bem.postEmoteEffects($(parent));
         }
     };
 
@@ -256,7 +284,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 wrap.append([
                     '<span class="berryemote_placeholder">',
                     '[](/', emoteName, ')',
-                    , '</span>'].join(''));
+                    '</span>'].join(''));
             });
         }
 
@@ -265,7 +293,8 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             $.each(emotes, function (index, emoteDom) {
                 var $emote = $(emoteDom);
                 var emote = Bem.emotes[$emote.attr('emote_id')];
-                var flags = $emote.attr('flags').split('-');
+                var flags = $emote.attr('flags');
+                flags = flags ? flags.split('-') : [];
 
                 var grandParent = $emote.parents('.berryemote-wrapper-outer');
                 $emote = grandParent.is('.berryemote-wrapper-outer') ? grandParent : $emote;
@@ -471,25 +500,19 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
 
     Bem.injectEmoteButton = function (target) {
         Bem.whenExists(target, function () {
-            if (Bem.debug) console.log('Injecting settings button.');
-            var settingsMenu = $('<div/>').addClass('settings').appendTo($(target)).text("Emotes");
-            settingsMenu.css('margin-right', '2px');
-            settingsMenu.css('background', 'url(http://backstage.berrytube.tv/marminator/bp.png) no-repeat scroll left center transparent');
-            settingsMenu.click(function () {
-                Bem.showBerrymoteSearch();
-            });
-
-            if (Bem.debug) console.log('Settings button injected: ', settingsMenu);
+            var emoteButton = $('<div/>').addClass('berrymotes_button').appendTo($(target)).text("Emotes");
+            emoteButton.css('margin-right', '2px');
+            emoteButton.css('background', 'url(//berrymotes.com/assets/bp.png) no-repeat scroll left center transparent');
         });
     };
 
-    Bem.listenForKeyboard = function () {
+    Bem.listenForInput = function () {
         $(window).keydown(function (event) {
             if ((event.keyCode == 69 && event.ctrlKey) ||
                 (Bem.drunkMode && event.ctrlKey && (event.keyCode == 87 || event.keyCode == 82)) ||
                 (event.keyCode == 27 && $('.berrymotes_search_results').length)) {
                 if ($('.berrymotes_search_results').length) {
-                    $('.dialogWindow').remove();
+                    $('.berrymotes.dialogWindow').remove();
                 }
                 else {
                     Bem.showBerrymoteSearch();
@@ -498,6 +521,9 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 return false;
             }
             return true;
+        });
+        $('body').on('click', '.berrymotes_button', function () {
+            Bem.showBerrymoteSearch();
         });
 
         $('body').on('focus', ':text,textarea', function () {
@@ -516,19 +542,13 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             if (Bem.debug) console.log('waiting ');
         }
         else {
-            Bem.loadSettings(settings_schema, function () {
-                if (Bem.debug) console.log('starting');
-                if (Bem.debug) {
-                    $("head").append('<link rel="stylesheet" type="text/css" ' +
-                        'href="http://backstage.berrytube.tv/marminator/berryemotecore.staging.css" />');
-                }
-                else {
-                    $("head").append('<link rel="stylesheet" type="text/css" ' +
-                        'href="http://backstage.berrytube.tv/marminator/berryemotecore.css" />');
-                }
-                Bem.berrySiteInit();
-                Bem.listenForKeyboard();
-            });
+            if (Bem.debug) console.log('starting');
+
+            $("head").append('<link rel="stylesheet" type="text/css" ' +
+                'href="//berrymotes.com/assets/berrymotes.core.css" />');
+
+            Bem.berrySiteInit();
+            Bem.listenForInput();
         }
     };
 
@@ -561,6 +581,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             uid: "berryEmoteSearch",
             center: true
         });
+        searchWin.parent('.dialogWindow').addClass('berrymotes');
         if (Bem.debug) console.log('Search window: ', searchWin);
         var settingsMenu = $('<div style="float: right; cursor: pointer; text-decoration: underline;" />')
             .appendTo(searchWin)
@@ -781,7 +802,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
     };
 
     Bem.emoteRefresh = function () {
-        $.getJSON('http://backstage.berrytube.tv/marminator/berrymotes_json_data.json', function (data) {
+        $.getJSON('//berrymotes.com/assets/berrymotes_json_data.json', function (data) {
             Bem.emotes = data;
             Bem.buildEmoteMap();
         });
@@ -794,11 +815,14 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             uid: "berryEmoteSettings",
             center: true
         });
+        settWin.parent('.dialogWindow').addClass('berrymotes');
 
         var configOps = $('<fieldset/>').appendTo(settWin);
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("Display Emotes: ").appendTo(row);
+        var rowDivStr = '<div class="settings_row" />';
+        var rowSpanStr = '<span class="settings_span" />';
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Display Emotes: ").appendTo(row);
         var displayEmotes = $('<input/>').attr('type', 'checkbox').appendTo(row);
         if (Bem.enabled) displayEmotes.attr('checked', 'checked');
         displayEmotes.change(function () {
@@ -806,9 +830,9 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             Bem.enabled = enabled;
             Bem.settings.set('enabled', enabled);
         });
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("NSFW Emotes: ").appendTo(row);
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("NSFW Emotes: ").appendTo(row);
         var nsfwEmotes = $('<input/>').attr('type', 'checkbox').appendTo(row);
         if (Bem.showNsfwEmotes) nsfwEmotes.attr('checked', 'checked');
         nsfwEmotes.change(function () {
@@ -816,9 +840,9 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             Bem.showNsfwEmotes = enabled;
             Bem.settings.set('showNsfwEmotes', enabled);
         });
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("Only show emotes on hover: ").appendTo(row);
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Only show emotes on hover: ").appendTo(row);
         var cadesBeardMode = $('<input/>').attr('type', 'checkbox').appendTo(row);
         if (Bem.onlyHover) cadesBeardMode.attr('checked', 'checked');
         cadesBeardMode.change(function () {
@@ -826,9 +850,9 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             Bem.onlyHover = enabled;
             Bem.settings.set('onlyHover', enabled);
         });
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("Enable extra effects: ").appendTo(row);
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Enable extra effects: ").appendTo(row);
         var effects = $('<input/>').attr('type', 'checkbox').appendTo(row);
         if (Bem.effects) effects.attr('checked', 'checked');
         effects.change(function () {
@@ -838,7 +862,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         });
         effects = $('<div style="margin-left:10px; border: 1px solid black;"><div style="clear:both;"/></div>');
         configOps.append(effects);
-//----------------------------------------
+        //----------------------------------------
         Bem.berryCreateOption(effects, "Slide Effect", "enableSlide");
         Bem.berryCreateOption(effects, "Spin Effect", "enableSpin");
         Bem.berryCreateOption(effects, "Vibrate Effect", "enableVibrate");
@@ -847,9 +871,9 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         Bem.berryCreateOption(effects, "Rotate Effect", "enableRotate");
         Bem.berryCreateOption(effects, "Brody Effect", "enableBrody");
         Bem.berryCreateOption(effects, "Invert Effect", "enableInvert");
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("Max Height:").appendTo(row);
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Max Height:").appendTo(row);
         var maxHeight = $('<input/>').attr('type', 'text').val(Bem.maxEmoteHeight).addClass("small").appendTo(row);
         maxHeight.css('text-align', 'center');
         maxHeight.css('width', '30px');
@@ -857,28 +881,87 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             Bem.maxEmoteHeight = maxHeight.val();
             Bem.settings.set('maxEmoteHeight', maxHeight.val());
         });
-        $('<span/>').text("pixels.").appendTo(row);
-//----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text("Blacklist (emote names, comma separated)").appendTo(row);
+        $(rowSpanStr).text("pixels.").appendTo(row);
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Emote Blacklist").appendTo(row);
         var emoteBlacklist = $('<textarea/>').val(Bem.blacklist).appendTo(row);
         emoteBlacklist.css('text-align', 'center');
         emoteBlacklist.css('width', '300px');
+        emoteBlacklist.css('height', '100px');
+        emoteBlacklist.css('display', 'block');
+        emoteBlacklist.css('margin-left', '10px');
         emoteBlacklist.keyup(function () {
             Bem.blacklist = emoteBlacklist.val().split(',');
             Bem.settings.set('blacklist', emoteBlacklist.val());
+        });//----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Site Blacklist (Display on everything except:) ").appendTo(row);
+        var enableSiteBlacklist = $('<input/>').attr('type', 'radio').attr('name', 'BemSiteList').appendTo(row);
+        var siteBlacklist = $('<textarea/>').val(Bem.siteBlacklist).appendTo(row);
+        if (Bem.enableSiteBlacklist) {
+            enableSiteBlacklist.attr('checked', 'checked');
+        } else {
+            siteBlacklist.attr('disabled', 'true');
+        }
+        enableSiteBlacklist.change(function () {
+            var enabled = $(this).is(":checked");
+            Bem.enableSiteBlacklist = enabled;
+            Bem.enableSiteWhitelist = !enabled;
+            Bem.settings.set('enableSiteBlacklist', enabled);
+            Bem.settings.set('enableSiteWhitelist', !enabled);
+            siteBlacklist.attr('disabled', !enabled);
+            siteWhitelist.attr('disabled', enabled);
         });
-//----------------------------------------
-        if (typeof siteSettings !== "undefined") {
-            siteSettings(configOps);
+        siteBlacklist.css('text-align', 'center');
+        siteBlacklist.css('width', '300px');
+        siteBlacklist.css('height', '100px');
+        siteBlacklist.css('display', 'block');
+        siteBlacklist.css('margin-left', '10px');
+        siteBlacklist.keyup(function () {
+            Bem.siteBlacklist = siteBlacklist.val().split(',');
+            Bem.settings.set('siteBlacklist', siteBlacklist.val());
+        });
+        //----------------------------------------
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text("Site Whitelist (Only display on:) ").appendTo(row);
+        var enableSiteWhitelist = $('<input/>').attr('type', 'radio').attr('name', 'BemSiteList').appendTo(row);
+        var siteWhitelist = $('<textarea/>').val(Bem.siteWhitelist).appendTo(row);
+        if (Bem.enableSiteWhitelist) {
+            enableSiteWhitelist.attr('checked', 'checked');
+        } else {
+            siteWhitelist.attr('disabled', 'true');
+        }
+        enableSiteWhitelist.change(function () {
+            var enabled = $(this).is(":checked");
+            Bem.enableSiteWhitelist = enabled;
+            Bem.enableSiteBlacklist = !enabled;
+            Bem.settings.set('enableSiteWhitelist', enabled);
+            Bem.settings.set('enableSiteBlacklist', !enabled);
+            siteWhitelist.attr('disabled', !enabled);
+            siteBlacklist.attr('disabled', enabled);
+        });
+        siteWhitelist.css('text-align', 'center');
+        siteWhitelist.css('width', '300px');
+        siteWhitelist.css('height', '100px');
+        siteWhitelist.css('display', 'block');
+        siteWhitelist.css('margin-left', '10px');
+        siteWhitelist.keyup(function () {
+            Bem.siteWhitelist = siteWhitelist.val().split(',');
+            Bem.settings.set('siteWhitelist', siteWhitelist.val());
+        });
+        //----------------------------------------
+        if (Bem.siteSettings) {
+            Bem.siteSettings(configOps);
         }
         settWin.window.center();
     };
 
     Bem.berryCreateOption = function (configOps, title, optionName) {
-        //----------------------------------------
-        row = $('<div/>').appendTo(configOps);
-        $('<span/>').text(title).appendTo(row);
+        var rowDivStr = '<div class="settings_row" />';
+        var rowSpanStr = '<span class="settings_span" />';
+        row = $(rowDivStr).appendTo(configOps);
+        $(rowSpanStr).text(title).appendTo(row);
         var chkBox = $('<input/>').attr('type', 'checkbox').appendTo(row);
         if (this[optionName]) chkBox.attr('checked', 'checked');
         chkBox.change(function () {
@@ -888,31 +971,35 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         });
     };
 
-    function walk(node) {
-        // I stole this function from here:
-        // http://is.gd/mwZp7E
-
-        var child, next;
-
-        switch (node.nodeType) {
-            case 1:  // Element
-            case 9:  // Document
-            case 11: // Document fragment
-                child = node.firstChild;
-                while (child) {
-                    next = child.nextSibling;
-                    walk(child);
-                    child = next;
+    Bem.loadSettings(settings_schema, function () {
+        var load = false;
+        if (Bem.enableSiteWhitelist && Bem.siteWhitelist) {
+            for (var i = 0; i < Bem.siteWhitelist.length; ++i) {
+                if (location.hostname.match(Bem.siteWhitelist[i])) {
+                    load = true;
                 }
-                break;
-
-            case 3: // Text node
-                Bem.applyEmotesToTextNode(node);
-                break;
+            }
+        } else {
+            load = true;
+            if (Bem.enableSiteBlacklist && Bem.siteBlacklist) {
+                for (var i = 0; i < Bem.siteBlacklist.length; ++i) {
+                    if (location.hostname.match(Bem.siteBlacklist[i])) {
+                        load = false;
+                    }
+                }
+            }
         }
-    }
 
-    Bem.apngSupported = typeof APNG === "undefined";
-    Bem.emoteRefresh();
-    Bem.waitToStart();
+        if(location.hostname == "gmiegnmgindbinjikakekghnpdhflooc") {
+            load = false;
+            Bem.showBerrymoteConfig();
+        }
+
+        if (load) {
+            Bem.apngSupported = typeof APNG === "undefined";
+            Bem.emoteRefresh();
+            Bem.waitToStart();
+        }
+    });
+
 })(Bem.jQuery);
