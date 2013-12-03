@@ -468,5 +468,9 @@ emote_info = [
     {
         'name': 'nudity',
         'nsfw': True
+    },
+    {
+        'name': 'kissit',
+        'nsfw': True
     }
 ]
