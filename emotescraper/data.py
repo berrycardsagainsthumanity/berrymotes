@@ -44,6 +44,7 @@ subreddits = [
     "BronyGaming",
     "btmodminmotes",
     "chakolateemotes",
+    "cianimotes",
     "clopclop",
     "cloudchasermotes",
     "comeinside",
@@ -53,6 +54,7 @@ subreddits = [
     "daylightemotes",
     "desktopponies",
     "dumbrock",
+    "dumbtoxin",
     "EquestriaGirls",
     "falloutequestria",
     "flitter",
@@ -136,6 +138,7 @@ subreddits = [
     "pinkiepie",
     "pinkquisition",
     "ploungeafterdark",
+    "ploungefootballleague",
     "ploungemafia",
     "ponyanarchism",
     "ponyloungerts",
@@ -159,6 +162,7 @@ subreddits = [
     "tbpimagedump2",
     "thanksblueshift",
     "thebestpony",
+    "thecane",
     "thepleasurehub",
     "themirishponies",
     "twidashmotes",
@@ -461,4 +465,24 @@ emote_info = [
         'name': 'futhelp',
         'nsfw': True
     },
+    {
+        'name': 'PonisEnvy',
+        'nsfw': True
+    },
+    {
+        'name': 'CanisEnvy',
+        'nsfw': True
+    },
+    {
+        'name': 'cane',
+        'nsfw': True
+    },
+    {
+        'name': 'nudity',
+        'nsfw': True
+    },
+    {
+        'name': 'kissit',
+        'nsfw': True
+    }
 ]
