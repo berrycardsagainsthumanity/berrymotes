@@ -141,6 +141,7 @@ subreddits = [
     "rubypinch",
     "sapphirestone",
     "seriouslyluna",
+    "sexyconfederatereddit",
     "shadeschatlounge",
     "spaceclop",
     "speedingturtle",
