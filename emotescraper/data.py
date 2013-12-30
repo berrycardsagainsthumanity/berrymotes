@@ -15,6 +15,7 @@ subreddits = [
     "btcanimotes",
     "jericksvector",
     "mylittlepony",
+    "abunchofemotes",
     "adviceponies",
     "ainbowdash",
     "anotherponymotessub",
@@ -475,5 +476,9 @@ emote_info = [
     {
         'name': 'kissit',
         'nsfw': True
-    }
+    },
+    {
+        'name': 'mwno',
+        'nsfw': True
+    },
 ]
