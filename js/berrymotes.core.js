@@ -68,7 +68,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
 
 
     Bem.effectStack = [];
-    Bem.emoteRegex = /\[\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
+    Bem.emoteRegex = /\[[\w\*]*\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
     Bem.searchPage = 0;
 
     Bem.spinAnimations = ['spin', 'zspin', 'xspin', 'yspin', '!spin', '!zspin', '!xspin', '!yspin'];
@@ -109,6 +109,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         if (emoteId) {
             var $a = $(a);
             var emote = Bem.emotes[emoteId];
+            var altText;
             var emoteCode = Bem.getEmoteHtml(emote, href.join('-'), a.innerHTML);
             var emoteDom = $("<span>" + emoteCode + "</span>");
             $a.replaceWith(emoteDom);
@@ -217,6 +218,8 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             }
         }
         if (Bem.showNsfwEmotes === false && emote.nsfw) eligible = false;
+        if (emote.com && Bem.community != emote.com) eligible = false;
+
         return eligible;
     };
 
@@ -427,10 +430,24 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             });
         }
         $.each(emotes, function (index, emoteDom) {
-            //if (Bem.debug) console.log('Adding bgimage to ', emoteDom);
             var $emote = $(emoteDom);
             var emote = Bem.emotes[$emote.attr('emote_id')];
             var position_string = (emote['background-position'] || ['0px', '0px']).join(' ');
+            var em_alt = $emote.find('em');
+            var strong_alt = $emote.find('strong');
+            if (em_alt || strong_alt) {
+                for (var key in emote) {
+                    var prefix = key.split('-')[0];
+                    var val = key.slice(prefix.length+1);
+                    if (prefix == "em") {
+                        em_alt.css(val, emote[key]);
+                    } else if (prefix == "strong") {
+                        strong_alt.css(val, emote[key]);
+                    } else if (prefix == "text") {
+                        $emote.css(val, emote[key]);
+                    }
+                }
+            }
             $emote.css('background-position', position_string);
             if ($emote.is('.canvasapng') == false) {
                 $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
@@ -899,7 +916,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         row = $(rowDivStr).appendTo(configOps);
         $(rowSpanStr).text("Emote Blacklist").appendTo(row);
         var emoteBlacklist = $('<textarea/>').val(Bem.blacklist).appendTo(row);
-        emoteBlacklist.css('text-align', 'center');
         emoteBlacklist.css('width', '300px');
         emoteBlacklist.css('height', '100px');
         emoteBlacklist.css('display', 'block');
@@ -926,7 +942,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             siteBlacklist.attr('disabled', !enabled);
             siteWhitelist.attr('disabled', enabled);
         });
-        siteBlacklist.css('text-align', 'center');
         siteBlacklist.css('width', '300px');
         siteBlacklist.css('height', '100px');
         siteBlacklist.css('display', 'block');
@@ -954,7 +969,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             siteWhitelist.attr('disabled', !enabled);
             siteBlacklist.attr('disabled', enabled);
         });
-        siteWhitelist.css('text-align', 'center');
         siteWhitelist.css('width', '300px');
         siteWhitelist.css('height', '100px');
         siteWhitelist.css('display', 'block');

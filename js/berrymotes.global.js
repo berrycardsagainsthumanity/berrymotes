@@ -26,14 +26,14 @@ Bem.berrySiteInit = function () {
                             Bem.applyEmotesToAnchor(this);
                         });
                         var buttonPanes = addedNodes.find('.commentarea .bottom-area .usertext-buttons');
-                        for(var j = 0; j < buttonPanes.length; ++j){
+                        for (var j = 0; j < buttonPanes.length; ++j) {
                             Bem.injectEmoteButton(buttonPanes[j]);
                         }
-                    }
-
-                    for (var j = 0; j < addedNodes.length; ++j) {
-                        var node = addedNodes[j];
-                        walk(node);
+                    } else {
+                        for (var j = 0; j < addedNodes.length; ++j) {
+                            var node = addedNodes[j];
+                            walk(node);
+                        }
                     }
 
                 } else if (mutations[i].type === "characterData") {
@@ -47,17 +47,6 @@ Bem.berrySiteInit = function () {
             subtree: true,
             characterData: true
         });
-
-        if (location.hostname == 'www.reddit.com') {
-            $('a[href^="/"]:not([id])').each(function () {
-                $(this).prev('.keyNavAnnotation').remove();
-                Bem.applyEmotesToAnchor(this);
-            });
-            var buttonPanes = $('.commentarea .bottom-area .usertext-buttons');
-            for(var j = 0; j < buttonPanes.length; ++j){
-                Bem.injectEmoteButton(buttonPanes[j]);
-            }
-        }
 
         function handleText(node) {
             Bem.applyEmotesToTextNode(node);
@@ -84,7 +73,18 @@ Bem.berrySiteInit = function () {
             }
         }
 
-        walk(document.body);
+        if (location.hostname == 'www.reddit.com') {
+            $('a[href^="/"]:not([id])').each(function () {
+                $(this).prev('.keyNavAnnotation').remove();
+                Bem.applyEmotesToAnchor(this);
+            });
+            var buttonPanes = $('.commentarea .bottom-area .usertext-buttons');
+            for (var j = 0; j < buttonPanes.length; ++j) {
+                Bem.injectEmoteButton(buttonPanes[j]);
+            }
+        } else {
+            walk(document.body);
+        }
     })(Bem.jQuery);
 };
 

@@ -10,6 +10,7 @@
 
 Bem = typeof Bem === "undefined" ? {} : Bem;
 Bem.jQuery = jQuery;
+Bem.community = "bt";
 
 var berrytube_settings_schema = [
     { key: 'drunkMode', type: "bool", default: false },

@@ -19,37 +19,40 @@ from StringIO import StringIO
 import os
 
 import logging
-logger = logging.getLogger(__name__) 
+
+logger = logging.getLogger(__name__)
+
 
 class BasicEmotesProcessorFactory(AbstractEmotesProcessorFactory):
     def __init__(self, single_emotes_filename=None):
+        super(BasicEmotesProcessorFactory, self).__init__()
         self.single_emotes_filename = single_emotes_filename
-        
+
     def new_processor(self, scraper=None, image_url=None, group=None):
-        return  BasicEmotesProcessor(scraper=scraper,
-                                          image_url=image_url,
-                                          group=group,
-                                          single_emotes_filename=self.single_emotes_filename)
-    
-    
+        return BasicEmotesProcessor(scraper=scraper,
+                                    image_url=image_url,
+                                    group=group,
+                                    single_emotes_filename=self.single_emotes_filename)
+
+
 class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
     def __init__(self, scraper=None, image_url=None, group=None, single_emotes_filename=None):
         AbstractEmotesProcessor.__init__(self, scraper=scraper, image_url=image_url, group=group)
-        
-        self.single_emotes_filename = single_emotes_filename        
+
+        self.single_emotes_filename = single_emotes_filename
         self.image_data = None
         self.image = None
-        
-        
+
+
     def process_group(self):
         self.load_image(self.get_file_path(self.image_url, self.scraper.cache_dir))
         AbstractEmotesProcessor.process_group(self)
-        
+
     def process_emote(self, emote):
         cropped = self.extract_single_image(emote, self.image)
         if cropped:
-            file_name = self.single_emotes_filename % (emote['sr'], max(emote['names'], key=len))
-            
+            file_name = self.single_emotes_filename.format(emote['sr'], max(emote['names'], key=len))
+
             try:
                 if not os.path.exists(file_name):
                     if not os.path.exists(os.path.dirname(file_name)):
@@ -57,21 +60,21 @@ class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
                             os.makedirs(os.path.dirname(file_name))
                         except OSError:
                             pass
-                        
+
                     f = open(file_name, 'wb')
                     cropped.save(f)
                     f.close()
             except Exception, e:
                 logger.exception(e)
                 raise e
-        
-    def load_image(self, image_file):                
+
+    def load_image(self, image_file):
         f = open(image_file, 'rb')
         self.image_data = f.read()
         f.close()
-                     
-        self.image = Image.open(StringIO(self.image_data))  
-        
+
+        self.image = Image.open(StringIO(self.image_data))
+
     def extract_single_image(self, emote, image):
         x = 0
         y = 0
@@ -84,5 +87,5 @@ class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
             if percentage:
                 x = width * x / 100
                 y = height * y / 100
-        
+
         return image.crop((x, y, x + width, y + height))

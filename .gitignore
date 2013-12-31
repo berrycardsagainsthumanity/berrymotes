@@ -13,4 +13,5 @@ images/
 single_emotes/
 
 js/berrymotes_data.js
+js/berrymotes_json_data.json
 js/berrymotes_colour_data.js

@@ -13,24 +13,22 @@
 # --------------------------------------------------------------------
 
 import logging
-logger = logging.basicConfig(level=logging.WARN)
+import time
+import requests
+from bmscraper.ratelimiter import TokenBucket
 
-from bmscraper import BMScraper, UserscriptEmotesProcessorFactory, RateLimiter
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+from bmscraper import BMScraper, UserscriptEmotesProcessorFactory
+
 from data import *
 from json import dumps, loads
 import os
 
 
-
-factory = UserscriptEmotesProcessorFactory(single_emotes_filename='..' + os.path.sep + 'single_emotes' + os.path.sep + '%s' + os.path.sep + '%s.png',
-                                           apng_dir='..' + os.path.sep + 'images',
-                                           apng_url='http://backstage.berrytube.tv/marminator/images/%s/%s')
-
-if os.path.exists('color_data.txt'):
-    f = open('color_data.txt', 'rb')
-    factory.color_data = loads(f.read())
-    f.close()
-  
+factory = UserscriptEmotesProcessorFactory(single_emotes_filename=os.path.join('..', 'single_emotes', '{}', '{}.png'),
+                                           apng_dir=os.path.join('..', 'images'),
+                                           apng_url='http://berrymotes.com/images/{}/{}')
 
 scraper = BMScraper(factory)
 scraper.user = 'ponymoteharvester'
@@ -39,26 +37,18 @@ scraper.subreddits = subreddits
 scraper.image_blacklist = image_blacklist
 scraper.nsfw_subreddits = nsfw_subreddits
 scraper.emote_info = emote_info
-scraper.rate_limit_lock = RateLimiter(max_messages=30, every_seconds=60)
+scraper.rate_limit_lock = TokenBucket(15, 30)
+scraper.tags_data = requests.get("http://btc.berrytube.tv/berrymotes/data.js").json()
 
-if os.path.exists('data.js'):
-    f = open('data.js', 'rb')
-    scraper.tags_data = loads(f.read())
-    f.close()
-
+start = time.time()
 scraper.scrape()
+logger.info("Finished scrape in {}.".format(time.time() - start))
 
-f = open('..' + os.path.sep + 'js' + os.path.sep + 'berrymotes_data.js', 'wb')
+f = open(os.path.join('..', 'js', 'berrymotes_data.js'), 'wb')
 f.write(''.join(["var berryEmotes=", dumps(scraper.emotes, separators=(',', ':')), ";"]))
 f.close()
 
-f = open('color_data.txt', 'wb')
-f.write(dumps(factory.color_data))
+f = open(os.path.join('..', 'js', 'berrymotes_json_data.json'), 'wb')
+f.write(dumps(scraper.emotes, separators=(',', ':')))
 f.close()
 
-color_data_js = {}
-for data in factory.color_data.values():
-    color_data_js.update(data)
-f = open('..' + os.path.sep + 'js' + os.path.sep + 'berrymotes_colour_data.js', 'wb')
-f.write(''.join(["var berryEmotesColours=", dumps(color_data_js, separators=(',', ':')), ";"]))
-f.close()

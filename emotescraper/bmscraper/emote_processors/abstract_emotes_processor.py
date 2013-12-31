@@ -24,13 +24,14 @@ class AbstractEmotesProcessorFactory(object):
     
 class AbstractEmotesProcessor(Job):
     def __init__(self, scraper=None, image_url=None, group=None):
+        super(AbstractEmotesProcessor, self).__init__()
         self.scraper = scraper
         self.image_url = image_url
-        self.group  = group
+        self.group = group
     
     def run(self):
         try:
-            logger.debug('Processing %s', self.image_url)        
+            logger.debug('Processing {}'.format(self.image_url))
                         
             self.process_group()
         except Exception, e:

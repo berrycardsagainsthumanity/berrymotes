@@ -13,7 +13,7 @@
 from .scraper import BMScraper
 from .emote_processors import (BasicEmotesProcessorFactory,
                                UserscriptEmotesProcessorFactory)
-from .ratelimiter import RateLimiter, RateExceededError
+
 import logging
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
