@@ -144,6 +144,7 @@ subreddits = [
     "seriouslyluna",
     "sexyconfederatereddit",
     "shadeschatlounge",
+    "shittyemotes",
     "spaceclop",
     "speedingturtle",
     "stalliongrad",
