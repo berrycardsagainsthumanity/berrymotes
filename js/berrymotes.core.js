@@ -118,8 +118,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         //try {
         var href = a.getAttribute('href').substring(1).split('-');
         var name = href.shift();
-        var altText = name.split(' ');
-        altText.shift();
+        var altText = a.getAttribute('title');
         var emoteId = Bem.map[name];
         if (emoteId) {
             var $a = $(a);
@@ -875,13 +874,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             .text("Next >");
 
         searchWin.window.center();
-    };
-
-    Bem.emoteRefresh = function () {
-        $.getJSON('//berrymotes.com/assets/berrymotes_json_data.json', function (data) {
-            Bem.emotes = data;
-            Bem.buildEmoteMap();
-        });
     };
 
     Bem.showBerrymoteConfig = function () {

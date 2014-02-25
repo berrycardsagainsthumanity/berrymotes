@@ -21,6 +21,7 @@
                 "apng-canvas.min.js",
                 "berrymotes.webkit.invert.js",
                 "berrymotes.global.js",
+                "berrymotes.chrome.js",
                 "berrymotes.core.js"
             ]
         }

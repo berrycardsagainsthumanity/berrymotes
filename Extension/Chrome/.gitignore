@@ -4,3 +4,4 @@ BabelExt.js
 berrymotes*.js
 jquery-*.js
 settings.html
+!berrymotes.chrome.js

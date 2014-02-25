@@ -334,7 +334,7 @@ Bem.settings.set('siteWhitelist', ['berrytube.tv', 'www.berrytube.tv']);
 //};
 
 Bem.emoteRefresh = function (cache) {
-    cache = cache || false;
+    cache = cache || true;
     $.ajax({
         cache: cache,
         url: '//berrymotes.com/assets/berrymotes_json_data.json',

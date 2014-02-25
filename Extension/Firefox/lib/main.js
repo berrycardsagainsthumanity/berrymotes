@@ -52,6 +52,7 @@ pageMod.PageMod({
         self.data.url("jquery-ui-1.9.1.custom.js"),
         self.data.url("berrymotes.invertfilter.js"),
         self.data.url("berrymotes.global.js"),
+        self.data.url("berrymotes.firefox.js"),
         self.data.url("berrymotes.core.js")
     ],
     onAttach: function (worker) {
@@ -70,7 +71,7 @@ pageMod.PageMod({
             switch (request.requestType) {
                 case 'xmlhttpRequest':
                     var responseObj = {
-                        XHRID: request.XHRID,
+                        callbackID: request.callbackID,
                         name: request.requestType
                     };
                     if (request.method == 'POST') {
