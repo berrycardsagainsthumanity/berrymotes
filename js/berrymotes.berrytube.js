@@ -18,9 +18,22 @@ var berrytube_settings_schema = [
 ];
 
 Bem.loggingIn = false;
+Bem.refreshers = ['marminator', 'toastdeib', 'miggyb', 'jerick'];
 
 Bem.berrySiteInit = function () {
     Bem.loadSettings(berrytube_settings_schema, function () {
+        var invertScript;
+        if (document.body.style.webkitFilter !== undefined) {
+            invertScript = document.createElement('script');
+            invertScript.type = 'text/javascript';
+            invertScript.src = 'http://backstage.berrytube.tv/marminator/berrymotes.webkit.invert.js';
+            document.body.appendChild(invertScript);
+        } else {
+            invertScript = document.createElement('script');
+            invertScript.type = 'text/javascript';
+            invertScript.src = 'http://backstage.berrytube.tv/marminator/berrymotes.invertfilter.js';
+            document.body.appendChild(invertScript);
+        }
         Bem.monkeyPatchChat();
         Bem.monkeyPatchPoll();
         Bem.monkeyPatchTabComplete();
@@ -32,9 +45,36 @@ Bem.berrySiteInit = function () {
             // not in drunk mode, just let it happen.
             return null;
         };
+
         $('form').submit(function () {
             Bem.loggingIn = true;
         });
+
+        function handleText(node) {
+            Bem.applyEmotesToTextNode(node);
+        }
+
+        function walk(node) {
+            // I stole this function from here:
+            // http://is.gd/mwZp7E
+            var child, next;
+            switch (node.nodeType) {
+                case 1:  // Element
+                case 9:  // Document
+                case 11: // Document fragment
+                    child = node.firstChild;
+                    while (child) {
+                        next = child.nextSibling;
+                        walk(child);
+                        child = next;
+                    }
+                    break;
+                case 3: // Text node
+                    handleText(node);
+                    break;
+            }
+        }
+        walk(document.body);
     });
 };
 
@@ -75,7 +115,7 @@ function marmReactiveMode() {
         pollpane.show();
     };
 
-    whenExists('#chatControls', function () {
+    Bem.whenExists('#chatControls', function () {
         if (Bem.debug) console.log('Injecting poll button.');
         var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Poll");
         menu.css('margin-right', '2px');
@@ -103,7 +143,7 @@ function marmReactiveMode() {
         return false;
     });
 
-    whenExists('#chatControls', function () {
+    Bem.whenExists('#chatControls', function () {
         if (Bem.debug) console.log('Injecting playlist button.');
         var menu = $('<div/>').addClass('settings').appendTo($('#chatControls')).text("Playlist");
         menu.css('margin-right', '2px');
@@ -134,7 +174,7 @@ function marmReactiveMode() {
 Bem.monkeyPatchChat = function () {
     var oldAddChatMsg = addChatMsg;
     addChatMsg = function (data, _to) {
-        var applyEmotes = berryEmotesEnabled && data.msg.msg.match(berryEmoteRegex);
+        var applyEmotes = Bem.enabled && data.msg.msg.match(Bem.emoteRegex);
         if (applyEmotes) {
             data.msg.msg = Bem.applyEmotesToStr(data.msg.msg);
         }
@@ -151,7 +191,7 @@ Bem.monkeyPatchChat = function () {
         oldAddChatMsg.apply(this, arguments);
         if (applyEmotes) {
             var chatMessage = $(_to).children(':last-child');
-            Bem.postEmoteEffects(chatMessage, false, berryEmoteEffectTTL, data.msg.nick);
+            Bem.postEmoteEffects(chatMessage, false, Bem.effectTTL, data.msg.nick);
         }
     }
 };
@@ -162,7 +202,7 @@ Bem.monkeyPatchPoll = function () {
         if (Bem.enabled) {
             for (var i = 0; i < data.options.length; ++i) {
                 // workaround so we don't conflict with BPM
-                data.options[i] = data.options[i].replace(berryEmoteRegex, '\\\\$1$2$3');
+                data.options[i] = data.options[i].replace(Bem.emoteRegex, '\\\\$1$2$3');
             }
         }
         oldPoll(data);
@@ -207,7 +247,7 @@ Bem.monkeyPatchTabComplete = function () {
 
             var ret = [];
             for (var i in Bem.map) {
-                if (isEmoteEligible(berryEmotes[Bem.map[i]])) {
+                if (Bem.isEmoteEligible(Bem.emotes[Bem.map[i]])) {
                     var m = i.match(re);
                     if (m) ret.push(m[0]);
                 }
@@ -258,7 +298,7 @@ Bem.siteSettings = function (configOps) {
     //----------------------------------------
     row = $('<div/>').appendTo(configOps);
     $('<span/>').text("Max chat lines to keep effects running on (saves CPU):").appendTo(row);
-    var chatTTL = $('<input/>').attr('type', 'text').val(berryEmoteEffectTTL).addClass("small").appendTo(row);
+    var chatTTL = $('<input/>').attr('type', 'text').val(Bem.effectTTL).addClass("small").appendTo(row);
     chatTTL.css('text-align', 'center');
     chatTTL.css('width', '30px');
     chatTTL.keyup(function () {
@@ -276,13 +316,68 @@ Bem.siteSettings = function (configOps) {
 Bem.settings = {
     get: function (key, callback) {
         var val = localStorage.getItem(key);
-        callback(key);
+        callback(val);
     },
     set: function (key, val, callback) {
         localStorage.setItem(key, val);
         if (callback) callback();
     }
 };
+
+Bem.settings.set('siteWhitelist', ['berrytube.tv', 'www.berrytube.tv']);
+
+
+//Bem.emoteRefresh = function() {
+//    $.getScript('http://backstage.berrytube.tv/marminator/berrymotes_data.js', function () {
+//        Bem.buildEmoteMap();
+//    });
+//};
+
+Bem.emoteRefresh = function (cache) {
+    cache = cache || false;
+    $.ajax({
+        cache: cache,
+        url: '//berrymotes.com/assets/berrymotes_json_data.json',
+        dataType: 'json',
+        success: function (data) {
+            Bem.emotes = data;
+            Bem.buildEmoteMap();
+        }
+    });
+};
+
+Bem.settings.get('apngSupported', function (apngSupported) {
+    var apngSupported;
+    if (apngSupported === null || apngSupported === undefined) {
+        (function () {
+            var apngTest = new Image(),
+                ctx = document.createElement("canvas").getContext("2d");
+            apngTest.onload = function () {
+                ctx.drawImage(apngTest, 0, 0);
+                apngSupported = ctx.getImageData(0, 0, 1, 1).data[3] === 0;
+                localStorage.setItem('apngSupported', apngSupported);
+                Bem.apngSupported = apngSupported;
+                if (!apngSupported) {
+                    // If we don't have apng support we're gonna load up the canvas hack. No reason to load if apng support exists.
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
+                    document.body.appendChild(script);
+                }
+            };
+            apngTest.src =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJRU5ErkJggg==";
+            // frame 1 (skipped on apng-supporting browsers): [0, 0, 0, 255]
+            // frame 2: [0, 0, 0, 0]
+        }());
+    }
+    else if (apngSupported === 'false') {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
+        document.body.appendChild(script);
+    }
+});
 
 var script = document.createElement('script');
 script.type = 'text/javascript';

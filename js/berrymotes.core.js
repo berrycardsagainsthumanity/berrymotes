@@ -12,13 +12,14 @@
 
 Bem = typeof Bem === "undefined" ? {} : Bem;
 (function ($) {
-    var settings_schema = [
+    var settingsSchema = [
         { key: 'enabled', type: "bool", default: true },
         { key: 'effects', type: "bool", default: true },
         { key: 'showNsfwEmotes', type: "bool", default: false },
         { key: 'onlyHover', type: "bool", default: false },
         { key: 'maxEmoteHeight', type: "int", default: 200 },
-        { key: 'debug', type: "bool", default: false },
+        // # TODO: Swap back to false
+        { key: 'debug', type: "bool", default: true },
         { key: 'enableSlide', type: "bool", default: true },
         { key: 'enableSpin', type: "bool", default: true },
         { key: 'enableVibrate', type: "bool", default: true },
@@ -68,12 +69,13 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
 
 
     Bem.effectStack = [];
-    Bem.emoteRegex = /\[[\w\*]*\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
+    Bem.emoteRegex = /\[([\w\* ]*)\]\(\/([\w:!#\/]+)([-\w!]*)([^)]*)\)/gi;
+    Bem.emRegex = /\*([\w\s]+)\*/gi;
+    Bem.strongRegex = /\*\*([\w\s]+)\*\*/gi;
     Bem.searchPage = 0;
 
     Bem.spinAnimations = ['spin', 'zspin', 'xspin', 'yspin', '!spin', '!zspin', '!xspin', '!yspin'];
     Bem.animationSpeeds = ['slowest', 'slower', 'slow', 'fast', 'faster', 'fastest'];
-    Bem.refreshers = ['marminator', 'toastdeib', 'miggyb', 'jerick'];
     Bem.animationSpeedMap = {
         'slowest': '14s',
         'slower': '12s',
@@ -83,18 +85,29 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         'fastest': '2s'
     };
 
+    Bem.tagRegexes = {
+        'fs': 'fluttershy',
+        'pp': 'pinkiepie',
+        'aj': 'applejack',
+        'r': 'rarity',
+        'ts': 'twilightsparkle',
+        'rd': 'rainbowdash',
+        'mane6': 'fluttershy|pinkiepie|rarity|applejack|twilightsparkle|rainbowdash',
+        'main6': 'fluttershy|pinkiepie|rarity|applejack|twilightsparkle|rainbowdash',
+        'cmc': 'scootaloo|sweetiebelle|applebloom'
+    };
+
     Bem.applyEmotesToStr = function (str) {
         var match;
         while (match = Bem.emoteRegex.exec(str)) {
-            var emoteId = Bem.map[match[1]];
+            var emoteId = Bem.map[match[2]];
             if (emoteId !== undefined) {
                 var emote = Bem.emotes[emoteId];
                 if (Bem.isEmoteEligible(emote)) {
-                    var emoteCode = Bem.getEmoteHtml(emote, match[2], match[3]);
+                    var innerText = Bem.formatInnerText(match[1]);
+                    var emoteCode = Bem.getEmoteHtml(emote, match[3], innerText, match[4]);
                     //if (Bem.debug) console.log('Emote code: ' + emoteCode);
-                    var replace_regex = new RegExp(['\\[\\]\\(\\/(', match[1], match[2], ')(', match[3] , ')\\)'].join(''), 'gi');
-                    //if (Bem.debug) console.log('Replace regex: ', replace_regex);
-                    str = str.replace(replace_regex, emoteCode);
+                    str = str.replace(match[0], emoteCode);
                 }
             }
         }
@@ -105,12 +118,13 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         //try {
         var href = a.getAttribute('href').substring(1).split('-');
         var name = href.shift();
+        var altText = name.split(' ');
+        altText.shift();
         var emoteId = Bem.map[name];
         if (emoteId) {
             var $a = $(a);
             var emote = Bem.emotes[emoteId];
-            var altText;
-            var emoteCode = Bem.getEmoteHtml(emote, href.join('-'), a.innerHTML);
+            var emoteCode = Bem.getEmoteHtml(emote, href.join('-'), a.innerHTML, altText);
             var emoteDom = $("<span>" + emoteCode + "</span>");
             $a.replaceWith(emoteDom);
             Bem.postEmoteEffects(emoteDom, false);
@@ -155,6 +169,18 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         'u'
     ];
 
+    Bem.formatInnerText = function(innerText){
+        if (innerText) {
+            while (itMatch = Bem.strongRegex.exec(innerText)) {
+                innerText = innerText.replace(itMatch[0], '<strong>' + itMatch[1] + '</strong>');
+            }
+            while (itMatch = Bem.emRegex.exec(innerText)) {
+                innerText = innerText.replace(itMatch[0], '<em>' + itMatch[1] + '</em>');
+            }
+        }
+        return innerText;
+    };
+
     Bem.applyEmotesToTextNode = function (textNode) {
         if (textNode.parentNode &&
             textNode.nodeValue &&
@@ -165,15 +191,17 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             var str = textNode.nodeValue;
             var emoteLocations = [];
             while (match = Bem.emoteRegex.exec(str)) {
-                var emoteId = Bem.map[match[1]];
+                var emoteId = Bem.map[match[2]];
                 if (emoteId !== undefined) {
                     var emote = Bem.emotes[emoteId];
                     if (Bem.isEmoteEligible(emote)) {
+                        var innerText = Bem.formatInnerText(match[1]);
                         emoteLocations.push({
-                            start: match.index,
-                            replace_length: match[0].length,
-                            emote_html: Bem.getEmoteHtml(emote, match[2]),
-                            alt_text: match[3]});
+                                start: match.index,
+                                replace_length: match[0].length,
+                                emote_html: Bem.getEmoteHtml(emote, match[3], innerText, match[4])
+                            }
+                        );
                     }
                 }
             }
@@ -182,9 +210,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 var loc = emoteLocations[i];
                 var newTextNode = textNode.splitText(loc.start);
                 newTextNode.deleteData(0, loc.replace_length);
-                if (loc.alt_text) {
-                    newTextNode.insertData(0, " " + loc.alt_text);
-                }
                 var emote_node = $(loc.emote_html);
                 //if(Bem.debug) console.log(loc.emote_html);
                 parent.insertBefore(emote_node.get(0), newTextNode);
@@ -193,8 +218,8 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         }
     };
 
-    Bem.getEmoteHtml = function (emote, flags, altText) {
-        return ['<span class="berryemote',
+    Bem.getEmoteHtml = function (emote, flags, innerText, altText) {
+        var emoteHtml = ['<span class="berryemote',
             emote.height > Bem.maxEmoteHeight ? ' resize' : '',
             Bem.apngSupported == false && emote.apng_url ? ' canvasapng' : '',
             Bem.onlyHover == true ? ' berryemote_hover' : '',
@@ -205,9 +230,13 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             'display:inline-block; ',
             'position: relative; overflow: hidden;', '" ',
             'flags="', flags, '" ',
-            'emote_id="', emote.id , '">', altText || "" , '</span>'
+            'emote_id="', emote.id , '">', innerText || "" , '</span>'
 
-        ].join('');
+        ];
+        if (altText) {
+            emoteHtml.push.apply(emoteHtml, ['<span class="berryemote_altText">', altText, '</span>']);
+        }
+        return emoteHtml.join('');
     };
 
     Bem.isEmoteEligible = function (emote) {
@@ -308,7 +337,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         if (!isSearch && Bem.effects) {
             $.each(emotes, function (index, emoteDom) {
                 var $emote = $(emoteDom);
-                var emote = Bem.emotes[$emote.attr('emote_id')];
                 var flags = $emote.attr('flags');
                 flags = flags ? flags.split('-') : [];
 
@@ -438,7 +466,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             if (em_alt || strong_alt) {
                 for (var key in emote) {
                     var prefix = key.split('-')[0];
-                    var val = key.slice(prefix.length+1);
+                    var val = key.slice(prefix.length + 1);
                     if (prefix == "em") {
                         em_alt.css(val, emote[key]);
                     } else if (prefix == "strong") {
@@ -452,14 +480,20 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             if ($emote.is('.canvasapng') == false) {
                 $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
             }
-            $emote.attr('title', [emote.names, ' from ', emote.sr].join(''));
+            var flags = $emote.attr('flags');
+
+            $emote.attr('title', [emote.names,
+                ' from /r/',
+                emote.sr,
+                flags ? ' effects: ' + flags : ''].join(''));
+
             if (emote['hover-background-position'] || emote['hover-background-image']) {
                 $emote.hover(function () {
                         var $this = $(this);
-                        var position_string = (emote['hover-background-position'] || ['0px', '0px']).join(' ');
+                        var positionString = (emote['hover-background-position'] || ['0px', '0px']).join(' ');
                         var width = emote['hover-width'];
                         var height = emote['hover-height'];
-                        $this.css('background-position', position_string);
+                        $this.css('background-position', positionString);
                         if (emote['hover-background-image']) {
                             $this.css('background-image', ['url(', emote['hover-background-image'], ')'].join(''));
                         }
@@ -486,13 +520,15 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                     });
             }
             username = username || "";
-            if (Bem.refreshers.indexOf(username.toLowerCase()) > -1) {
+            if (Bem.refreshers && Bem.refreshers.indexOf(username.toLowerCase()) > -1) {
                 var flags = $emote.attr('flags').split('-');
                 if (flags.indexOf('refresh') >= 0) {
                     var sleep = Math.random() * 30;
                     sleep = (sleep + 1) * 1000;
                     if (Bem.debug) console.log('Got refresh, going in: ', sleep);
-                    setTimeout(berryEmoteDataRefresh, sleep);
+                    setTimeout(function () {
+                        Bem.emoteRefresh(false);
+                    }, sleep);
                 }
             }
             $emote.removeAttr('flags');
@@ -631,10 +667,17 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         }
         $searchBox.focus();
         $searchBox.select();
+        $('<span class="prev_page" style="cursor: pointer; text-decoration: underline;" />')
+            .appendTo(searchWin)
+            .text("< Prev");
+        $('<span class="next_page" style="cursor: pointer; text-decoration: underline; margin-left:5px;" />')
+            .appendTo(searchWin)
+            .text("Next >");
+        $('<span class="num_found" style="margin-left: 5px;" />')
+            .appendTo(searchWin);
 
         var $results = $('<div class="berrymotes_search_results" style="width:500px; height: 500px; overflow-y: scroll;" ></div>').appendTo(searchWin);
         $results.on('click', '.berryemote', function (e) {
-            var insertMode = false;
             if (Bem.lastFocus) {
                 var $emote = $(e.currentTarget);
                 var emote = Bem.emotes[$emote.attr('emote_id')];
@@ -662,7 +705,6 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         });
 
         var showSearchResults = function () {
-            var max = Math.min(pageSize, searchResults.length);
             $results.empty();
             var start = page * pageSize;
             var max = Math.min(start + pageSize, searchResults.length);
@@ -695,7 +737,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 var srs = [];
                 var terms = [];
                 var scores = {};
-                var srRegex = /^[-+]?sr:/i;
+                var srRegex = /^([-+]?sr:)|([-+]?[/]?r\/)/i;
                 var tagRegex = /^[-+]/i;
 
                 function sdrify(str) {
@@ -705,13 +747,17 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 for (var i = 0; i < searchBits.length; ++i) {
                     var bit = $.trim(searchBits[i]);
                     if (bit.match(srRegex)) {
+                        var trim = bit.match(srRegex)[0].length;
                         if (bit[0] == '-' || bit[0] == '+') {
-                            srs.push({match: bit[0] == '-' ? false : true, sdr: sdrify(bit.substring(4))});
+                            srs.push({match: bit[0] != '-', sdr: sdrify(bit.substring(trim))});
                         } else {
-                            srs.push({match: true, sdr: sdrify(bit.substring(3))});
+                            srs.push({match: true, sdr: sdrify(bit.substring(trim))});
                         }
                     } else if (bit.match(tagRegex)) {
-                        tags.push({match: bit[0] == '-' ? false : true, sdr: sdrify(bit.substring(1))});
+                        var trim = bit.match(tagRegex)[0].length;
+                        var tag = bit.substring(trim);
+                        var tagRegex = tag in Bem.tagRegexes ? sdrify(Bem.tagRegexes[tag]) : sdrify(tag);
+                        tags.push({match: bit[0] != '-', sdr: tagRegex});
                     } else {
                         terms.push({
                             any: new RegExp(bit, 'i'),
@@ -998,9 +1044,10 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         });
     };
 
-    Bem.loadSettings(settings_schema, function () {
+    Bem.loadSettings(settingsSchema, function () {
         var load = false;
-        if (Bem.enableSiteWhitelist && Bem.siteWhitelist) {
+
+        if (Bem.enableSiteWhitelist && Bem.siteWhitelist && Bem.siteWhitelist.length > 0) {
             for (var i = 0; i < Bem.siteWhitelist.length; ++i) {
                 if (location.hostname.match(Bem.siteWhitelist[i])) {
                     load = true;
@@ -1023,10 +1070,17 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         }
 
         if (load) {
+            if (Bem.debug) console.log("Load is a go, waiting to start.");
             Bem.apngSupported = typeof APNG === "undefined";
             Bem.emoteRefresh();
             Bem.waitToStart();
-        }
+            var unsafeGlobal;
+            if (typeof unsafeWindow !== 'undefined') unsafeGlobal = unsafeWindow;
+            if (!unsafeGlobal && typeof Global !== 'undefined') unsafeGlobal = Global;
+            if (!unsafeGlobal) unsafeGlobal = (window || this);
+
+            unsafeGlobal.Bem = Bem;
+        } else if (Bem.debug) console.log("Load is a negative, going quiet.");
     });
 
 })(Bem.jQuery);

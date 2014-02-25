@@ -45,7 +45,8 @@ scraper.scrape()
 logger.info("Finished scrape in {}.".format(time.time() - start))
 
 f = open(os.path.join('..', 'js', 'berrymotes_data.js'), 'wb')
-f.write(''.join(["var berryEmotes=", dumps(scraper.emotes, separators=(',', ':')), ";"]))
+json = dumps(scraper.emotes, separators=(',', ':'))
+f.write(''.join(["var berryEmotes=", json, ";"]))
 f.close()
 
 f = open(os.path.join('..', 'js', 'berrymotes_json_data.json'), 'wb')

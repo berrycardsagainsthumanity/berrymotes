@@ -22,6 +22,10 @@
     position: relative;
 }
 
+.berryemote_altText{
+    color: gray;
+}
+
 .berryemote_hover:hover>.berryemote-wrapper-outer,
 .berryemote_hover:hover>.berryemote {
     background-color: rgba(0, 0, 0, 0.6);
