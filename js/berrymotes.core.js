@@ -18,8 +18,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         { key: 'showNsfwEmotes', type: "bool", default: false },
         { key: 'onlyHover', type: "bool", default: false },
         { key: 'maxEmoteHeight', type: "int", default: 200 },
-        // # TODO: Swap back to false
-        { key: 'debug', type: "bool", default: true },
+        { key: 'debug', type: "bool", default: false },
         { key: 'enableSlide', type: "bool", default: true },
         { key: 'enableSpin', type: "bool", default: true },
         { key: 'enableVibrate', type: "bool", default: true },
