@@ -1,25 +1,4 @@
-*.py[cod]
-
-# C extensions
-*.so
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-
-# Installer logs
-pip-log.txt
+*~
 
 # Unit test / coverage reports
 .coverage
@@ -30,9 +9,9 @@ nosetests.xml
 
 Thumbs.db
 
-berrymotes_data.js
-images
-colour_data.txt
-checked_images.txt
-single_emotes
-berrymotes_colour_data.js
+images/
+single_emotes/
+
+js/berrymotes_data.js
+js/berrymotes_json_data.json
+js/berrymotes_colour_data.js
