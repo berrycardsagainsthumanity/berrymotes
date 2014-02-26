@@ -973,10 +973,10 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         row = $(rowDivStr).appendTo(configOps);
         $(rowSpanStr).text(title).appendTo(row);
         var chkBox = $('<input/>').attr('type', 'checkbox').appendTo(row);
-        if (this[optionName]) chkBox.attr('checked', 'checked');
+        if (Bem[optionName]) chkBox.attr('checked', 'checked');
         chkBox.change(function () {
             var enabled = $(this).is(":checked");
-            eval(optionName + " = " + enabled);
+            Bem[optionName] = enabled;
             Bem.settings.set(optionName, enabled);
         });
     };

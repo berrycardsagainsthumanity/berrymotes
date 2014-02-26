@@ -42,7 +42,7 @@ class BMScraper(FileNameUtils):
         self.emote_info = []
         self.tags_data = {}
         self.cache_dir = '../images'
-        self.workers = 1#cpu_count()
+        self.workers = cpu_count()
         self.processor_factory = processor_factory
         self.rate_limit_lock = None
 
@@ -60,7 +60,7 @@ class BMScraper(FileNameUtils):
                     for emote in other_subreddits_emotes:
                         for name in subreddit_emote['names']:
                             if name in emote['names']:
-                                logger.debug("Deduping: {}".format(name))
+                                #logger.debug("Deduping: {}".format(name))
                                 emote['names'].remove(name)
                                 if len(emote['names']) == 0:
                                     self.emotes.remove(emote)
