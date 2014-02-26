@@ -167,7 +167,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         'u'
     ];
 
-    Bem.formatInnerText = function(innerText){
+    Bem.formatInnerText = function (innerText) {
         if (innerText) {
             while (itMatch = Bem.strongRegex.exec(innerText)) {
                 innerText = innerText.replace(itMatch[0], '<strong>' + itMatch[1] + '</strong>');
@@ -280,8 +280,11 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 if (isSearch) {
                     $emote.hover(function () {
                         var $this = $(this);
-                        $this.css('background-image', '');
-                        Bem.applyAnimation(emote, $this);
+                        var bgImage = $this.css('background-image');
+                        if (bgImage && bgImage != 'none') {
+                            $this.css('background-image', '');
+                            Bem.applyAnimation(emote, $this);
+                        }
                     });
                     $emote.append('Hover to animate');
                     $emote.css('border', '1px solid black');
