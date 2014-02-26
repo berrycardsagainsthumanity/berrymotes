@@ -11,7 +11,18 @@
 Bem = typeof Bem === "undefined" ? {} : Bem;
 Bem.jQuery = jQuery.noConflict(true);
 
+var berrytube_settings_schema = [
+    { key: 'enableSiteBlacklist', type: "bool", default: false },
+    { key: 'enableSiteWhitelist', type: "bool", default: true },
+    { key: 'siteWhitelist', type: "string_array", default: ['www.reddit.com'] },
+    { key: 'siteBlacklist', type: "string_array", default: [] }
+];
+
 Bem.berrySiteInit = function () {
+    Bem.loadSettings(berrytube_settings_schema, function () {
+
+    });
+
     (function ($) {
         var mutationObserver = window.MutationObserver || window.MozMutationObserver || window.WebKitMutationObserver;
 
@@ -100,6 +111,63 @@ Bem.settings = {
         };
         BabelExt.storage.set(key, "" + val, callback);
     }
+};
+
+Bem.siteSettings = function (configOps) {
+    var row = $(rowDivStr).appendTo(configOps);
+    $(rowSpanStr).text("Site Blacklist (Display on everything except:) ").appendTo(row);
+    var enableSiteBlacklist = $('<input/>').attr('type', 'radio').attr('name', 'BemSiteList').appendTo(row);
+    var siteBlacklist = $('<textarea/>').val(Bem.siteBlacklist).appendTo(row);
+    if (Bem.enableSiteBlacklist) {
+        enableSiteBlacklist.attr('checked', 'checked');
+    } else {
+        siteBlacklist.attr('disabled', 'true');
+    }
+    enableSiteBlacklist.change(function () {
+        var enabled = $(this).is(":checked");
+        Bem.enableSiteBlacklist = enabled;
+        Bem.enableSiteWhitelist = !enabled;
+        Bem.settings.set('enableSiteBlacklist', enabled);
+        Bem.settings.set('enableSiteWhitelist', !enabled);
+        siteBlacklist.attr('disabled', !enabled);
+        siteWhitelist.attr('disabled', enabled);
+    });
+    siteBlacklist.css('width', '300px');
+    siteBlacklist.css('height', '100px');
+    siteBlacklist.css('display', 'block');
+    siteBlacklist.css('margin-left', '10px');
+    siteBlacklist.keyup(function () {
+        Bem.siteBlacklist = siteBlacklist.val().split(',');
+        Bem.settings.set('siteBlacklist', siteBlacklist.val());
+    });
+    //----------------------------------------
+    row = $(rowDivStr).appendTo(configOps);
+    $(rowSpanStr).text("Site Whitelist (Only display on:) ").appendTo(row);
+    var enableSiteWhitelist = $('<input/>').attr('type', 'radio').attr('name', 'BemSiteList').appendTo(row);
+    var siteWhitelist = $('<textarea/>').val(Bem.siteWhitelist).appendTo(row);
+    if (Bem.enableSiteWhitelist) {
+        enableSiteWhitelist.attr('checked', 'checked');
+    } else {
+        siteWhitelist.attr('disabled', 'true');
+    }
+    enableSiteWhitelist.change(function () {
+        var enabled = $(this).is(":checked");
+        Bem.enableSiteWhitelist = enabled;
+        Bem.enableSiteBlacklist = !enabled;
+        Bem.settings.set('enableSiteWhitelist', enabled);
+        Bem.settings.set('enableSiteBlacklist', !enabled);
+        siteWhitelist.attr('disabled', !enabled);
+        siteBlacklist.attr('disabled', enabled);
+    });
+    siteWhitelist.css('width', '300px');
+    siteWhitelist.css('height', '100px');
+    siteWhitelist.css('display', 'block');
+    siteWhitelist.css('margin-left', '10px');
+    siteWhitelist.keyup(function () {
+        Bem.siteWhitelist = siteWhitelist.val().split(',');
+        Bem.settings.set('siteWhitelist', siteWhitelist.val());
+    });
+    //----------------------------------------
 };
 
 (function ($) {
