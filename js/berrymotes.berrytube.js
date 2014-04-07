@@ -309,7 +309,7 @@ Bem.siteSettings = function (configOps) {
     row = $('<div/>').appendTo(configOps);
     var refresh = $('<button>Refresh Data</button>').appendTo(row);
     refresh.click(function () {
-        Bem.dataRefresh();
+        Bem.emoteRefresh(false);
     });
 };
 
@@ -334,7 +334,7 @@ Bem.settings.set('siteWhitelist', ['berrytube.tv', 'www.berrytube.tv']);
 //};
 
 Bem.emoteRefresh = function (cache) {
-    cache = cache || true;
+    cache = cache !== false;
     $.ajax({
         cache: cache,
         url: '//berrymotes.com/assets/berrymotes_json_data.json',
