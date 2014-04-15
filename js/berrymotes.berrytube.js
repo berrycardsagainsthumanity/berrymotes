@@ -22,6 +22,8 @@ Bem.refreshers = ['marminator', 'toastdeib', 'miggyb', 'jerick'];
 
 Bem.berrySiteInit = function () {
     Bem.loadSettings(berrytube_settings_schema, function () {
+        // Export it for backwards compat with BT squee inbox
+        postEmoteEffects = Bem.postEmoteEffects;
         var invertScript;
         if (document.body.style.webkitFilter !== undefined) {
             invertScript = document.createElement('script');
@@ -347,7 +349,6 @@ Bem.emoteRefresh = function (cache) {
 };
 
 Bem.settings.get('apngSupported', function (apngSupported) {
-    var apngSupported;
     if (apngSupported === null || apngSupported === undefined) {
         (function () {
             var apngTest = new Image(),
@@ -372,10 +373,13 @@ Bem.settings.get('apngSupported', function (apngSupported) {
         }());
     }
     else if (apngSupported === 'false') {
+        Bem.apngSupported = false;
         var script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
         document.body.appendChild(script);
+    } else {
+        Bem.apngSupported = true;
     }
 });
 

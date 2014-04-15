@@ -478,6 +478,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
                 $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
             }
             var flags = $emote.attr('flags');
+            if (flags) flags = flags.replace('-refresh', '');
 
             $emote.attr('title', [emote.names,
                 ' from /r/',
