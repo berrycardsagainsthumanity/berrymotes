@@ -60,7 +60,6 @@ class BMScraper(FileNameUtils):
                     for emote in other_subreddits_emotes:
                         for name in subreddit_emote['names']:
                             if name in emote['names']:
-                                #logger.debug("Deduping: {}".format(name))
                                 emote['names'].remove(name)
                                 if len(emote['names']) == 0:
                                     self.emotes.remove(emote)
@@ -124,9 +123,7 @@ class BMScraper(FileNameUtils):
         if self.user and self.password:
             body = {'user': self.user, 'passwd': self.password, "rem": False}
             self.rate_limit_lock and self.rate_limit_lock.acquire()
-            response = self._requests.post('http://www.reddit.com/api/login', body)
-            #cookie = response.headers['set-cookie']
-            #self._headers['cookie'] = cookie[:cookie.index(';')]
+            self._requests.post('http://www.reddit.com/api/login', body)
 
         self._fetch_css()
 

@@ -76,7 +76,7 @@ class UserscriptEmotesProcessor(BasicEmotesProcessor, APNGCheck):
             if not os.path.exists(os.path.dirname(apng_file)):
                 try:
                     os.makedirs(os.path.dirname(apng_file))
-                except OSError, e:
+                except OSError:
                     pass
 
             if not os.path.exists(apng_file):

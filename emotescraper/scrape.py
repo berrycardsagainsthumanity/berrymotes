@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 from bmscraper import BMScraper, UserscriptEmotesProcessorFactory
 
 from data import *
-from json import dumps, loads
+from json import dumps
 import os
 
 
