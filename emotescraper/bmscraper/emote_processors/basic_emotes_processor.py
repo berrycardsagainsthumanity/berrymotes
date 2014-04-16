@@ -79,11 +79,14 @@ class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
         width = emote['width']
         height = emote['height']
         if 'background-position' in emote:
-            percentage = emote['background-position'][0].endswith('%') or emote['background-position'][1].endswith('%')
-            x = int(emote['background-position'][0].strip('-').strip('px').strip('%'))
-            y = int(emote['background-position'][1].strip('-').strip('px').strip('%'))
-            if percentage:
-                x = width * x / 100
-                y = height * y / 100
+            if len(emote['background-position']) > 0:
+                x = int(emote['background-position'][0].strip('-').strip('px').strip('%'))
+                if emote['background-position'][0].endswith('%'):
+                    x = width * x / 100;
+
+            if len(emote['background-position']) > 1:
+                y = int(emote['background-position'][1].strip('-').strip('px').strip('%'))
+                if emote['background-position'][1].endswith('%'):
+                    y = height * y / 100;
 
         return image.crop((x, y, x + width, y + height))
