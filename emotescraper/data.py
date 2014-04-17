@@ -11,6 +11,13 @@ image_blacklist = [
     "http://b.thumbs.redditmedia.com/9KPIZR5eNlWAev7m.png",
 ]
 
+image_blacklist_android = image_blacklist + [
+    #andrid ignore, mostly becaouse they are too large
+    "http://d.thumbs.redditmedia.com/6vnl2z58K-37e-du.png",
+    "http://e.thumbs.redditmedia.com/m48Mt-C5OajCRvXp.png",
+    "http://d.thumbs.redditmedia.com/jbMarIOi-_cCQIRW.png",
+]
+
 subreddits = [
     "marmemotes",
     "marmemotes2",
