@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 from bmscraper import BMScraper, UserscriptEmotesProcessorFactory
 
 from data import *
-from json import dumps, loads
+import json
 import os
 
 
@@ -44,12 +44,19 @@ start = time.time()
 scraper.scrape()
 logger.info("Finished scrape in {}.".format(time.time() - start))
 
-f = open(os.path.join('..', 'js', 'berrymotes_data.js'), 'wb')
-json = dumps(scraper.emotes, separators=(',', ':'))
-f.write(''.join(["var berryEmotes=", json, ";"]))
-f.close()
+with open(os.path.join('..', 'js', 'berrymotes_data.min.js'), 'w') as f:
+    f.write("var berryEmotes = ")
+    json.dump(scraper.emotes, fp=f, separators=(',', ':') )
+    f.write(";")
 
-f = open(os.path.join('..', 'js', 'berrymotes_json_data.json'), 'wb')
-f.write(dumps(scraper.emotes, separators=(',', ':')))
-f.close()
+with open(os.path.join('..', 'js', 'berrymotes_data.js'), 'w') as f:
+    f.write("var berryEmotes = ")
+    json.dump(scraper.emotes, fp=f, separators=(',', ':'), indent=2 )
+    f.write(";")
+
+with open(os.path.join('..', 'js', 'berrymotes_data.min.json'), 'w') as f:
+    json.dump(scraper.emotes, fp=f, separators=(',', ':') )
+
+with open(os.path.join('..', 'js', 'berrymotes_data.json'), 'w') as f:
+    json.dump(scraper.emotes, fp=f, separators=(',', ':'), indent=2 )
 
