@@ -197,6 +197,12 @@ class BMScraper(FileNameUtils):
         key_func = lambda e: e[1]
         for emote, group in itertools.groupby(sorted(emotes_staging.iteritems(), key=key_func), key_func):
             emote['names'] = [a[0].encode('ascii', 'ignore') for a in group]
+            
+            full_names = []
+            for name in emote['names']:
+                full_names.append('r/'+subreddit+'/'+name)
+            emote['names'] = emote['names'] + full_names
+            
             for name in emote['names']:
                 meta_data = next((x for x in self.emote_info if x['name'] == name), None)
 
