@@ -72,7 +72,7 @@ class BMScraper(FileNameUtils):
 
         for subreddit in self.subreddits:
             workpool.put(DownloadJob(self._requests,
-                                     'http://www.reddit.com/r/{}/stylesheet'.format(subreddit),
+                                     'https://pay.reddit.com/r/{}/stylesheet'.format(subreddit),
                                      retry=5,
                                      rate_limit_lock=self.rate_limit_lock,
                                      callback=self._callback_fetch_stylesheet,
