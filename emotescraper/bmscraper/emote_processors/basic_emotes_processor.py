@@ -49,7 +49,7 @@ class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
         AbstractEmotesProcessor.process_group(self)
 
     def process_emote(self, emote):
-        file_name = self.single_emotes_filename.format(emote['sr'], max(emote['names'], key=len))
+        file_name = self.single_emotes_filename.format(emote['sr'], os.path.join( *(max(emote['names'], key=len).split('/')) ) )
         if not os.path.exists(file_name):
             cropped = self.extract_single_image(emote, self.image)
             if cropped:
@@ -87,3 +87,4 @@ class BasicEmotesProcessor(AbstractEmotesProcessor, FileNameUtils):
                 y = height * y / 100
 
         return image.crop((x, y, x + width, y + height))
+
