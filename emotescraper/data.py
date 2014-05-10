@@ -94,6 +94,7 @@ subreddits = [
     "mylittleanhero23",
     "mylittleanime",
     "mylittleaprilfools",
+    "mylittleayrl",
     "mylittlebannertest",
     "mylittlecelestias",
     "mylittlechaos",
