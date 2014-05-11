@@ -328,18 +328,11 @@ Bem.settings = {
 
 Bem.settings.set('siteWhitelist', ['berrytube.tv', 'www.berrytube.tv']);
 
-
-//Bem.emoteRefresh = function() {
-//    $.getScript('http://backstage.berrytube.tv/marminator/berrymotes_data.js', function () {
-//        Bem.buildEmoteMap();
-//    });
-//};
-
 Bem.emoteRefresh = function (cache) {
     cache = cache !== false;
     $.ajax({
         cache: cache,
-        url: '//berrymotes.com/assets/berrymotes_json_data.json',
+        url: '//berrymotes.com/assets/berrymotes_data.min.json',
         dataType: 'json',
         success: function (data) {
             Bem.emotes = data;

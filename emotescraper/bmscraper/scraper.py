@@ -21,15 +21,24 @@ import re
 from collections import defaultdict
 import itertools
 import os
+from os import path
 from downloadjob import DownloadJob
 from filenameutils import FileNameUtils
 from multiprocessing import cpu_count
 from dateutil import parser
+import re
 
 import logging
 
 logger = logging.getLogger(__name__)
 
+re_numbers = re.compile(r"\d+")
+
+def _remove_duplicates(seq):
+    '''https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order'''
+    seen = set()
+    seen_add = seen.add
+    return [ x for x in seq if x not in seen and not seen_add(x)]
 
 class BMScraper(FileNameUtils):
     def __init__(self, processor_factory):
@@ -50,14 +59,44 @@ class BMScraper(FileNameUtils):
 
         self._requests = requests.Session()
         self._requests.headers = {'user-agent', 'User-Agent: Ponymote harvester v2.0 by /u/marminatoror'}
-
+        
+    def _emote_post_preferance(self):
+        '''A emote's first name will be used to post. Some names are preferred over other names. We re-order the names here.''' 
+        
+        # We push all the numbered names back. They are generally not very descriptive.
+        for emote in self.emotes:
+            numbered_names = []
+            descriptive_names = []
+            for name in emote['names']:
+                if len(re_numbers.findall(name)) > 0:
+                    numbered_names.append(name)
+                else:
+                    descriptive_names.append(name)
+            emote['names'] = descriptive_names + numbered_names
+    
     def _dedupe_emotes(self):
-        with self.mutex:
-            for subreddit in self.subreddits:
-                subreddit_emotes = [x for x in self.emotes if x['sr'] == subreddit]
-                other_subreddits_emotes = [x for x in self.emotes if x['sr'] != subreddit]
-                for subreddit_emote in subreddit_emotes:
-                    for emote in other_subreddits_emotes:
+        for subreddit in self.subreddits:
+            subreddit_emotes = [x for x in self.emotes if x['sr'] == subreddit]
+            other_subreddits_emotes = [x for x in self.emotes if x['sr'] != subreddit]
+            for subreddit_emote in subreddit_emotes:
+                for emote in other_subreddits_emotes:
+                    
+                    # merge (move all names to one emote) both emotes if they use the same image source
+                    # This method is not perfect. It ignores CSS attributes.
+                    # A emote using the same image source (While still being visually different using CSS)
+                    # will still be incorrectly merged.
+                    # 
+                    # This method does not do visual image comparison. Visually equal images will not be merged.
+                    if (emote['background-image'] == subreddit_emote['background-image'] and
+                        emote.get('background-position') == subreddit_emote.get('background-position') and
+                        emote.get('height') == subreddit_emote.get('height') and
+                        emote.get('width') == subreddit_emote.get('width') ):
+                        
+                        subreddit_emote['names'] = subreddit_emote['names'] + emote['names']
+                        _remove_duplicates(subreddit_emote['names'])
+                        self.emotes.remove(emote)
+                    else:
+                        # Remove duplicate names. The subreddit scraping order will determine which emote keeps there name.
                         for name in subreddit_emote['names']:
                             if name in emote['names']:
                                 #logger.debug("Deduping: {}".format(name))
@@ -72,7 +111,7 @@ class BMScraper(FileNameUtils):
 
         for subreddit in self.subreddits:
             workpool.put(DownloadJob(self._requests,
-                                     'http://www.reddit.com/r/{}/stylesheet'.format(subreddit),
+                                     'https://pay.reddit.com/r/{}/stylesheet'.format(subreddit),
                                      retry=5,
                                      rate_limit_lock=self.rate_limit_lock,
                                      callback=self._callback_fetch_stylesheet,
@@ -131,7 +170,9 @@ class BMScraper(FileNameUtils):
         self._fetch_css()
 
         self._dedupe_emotes()
-
+        
+        self._emote_post_preferance()
+        
         self._download_images()
 
         self._process_emotes()
@@ -197,6 +238,12 @@ class BMScraper(FileNameUtils):
         key_func = lambda e: e[1]
         for emote, group in itertools.groupby(sorted(emotes_staging.iteritems(), key=key_func), key_func):
             emote['names'] = [a[0].encode('ascii', 'ignore') for a in group]
+            
+            full_names = []
+            for name in emote['names']:
+                full_names.append('r/'+subreddit+'/'+name)
+            emote['names'] = emote['names'] + full_names
+            
             for name in emote['names']:
                 meta_data = next((x for x in self.emote_info if x['name'] == name), None)
 
@@ -260,6 +307,6 @@ class BMScraper(FileNameUtils):
             except OSError:
                 pass
 
-        f = open(image_path, 'wb')
-        f.write(data)
-        f.close()
+        with open(image_path, 'wb') as f:
+            f.write(data)
+
