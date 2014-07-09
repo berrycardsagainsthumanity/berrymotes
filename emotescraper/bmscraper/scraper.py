@@ -61,7 +61,9 @@ class BMScraper(FileNameUtils):
                         for name in subreddit_emote['names']:
                             if name in emote['names']:
                                 emote['names'].remove(name)
+                                logger.debug('Removing {} from {}'.format(name, emote['sr']))
                                 if len(emote['names']) == 0:
+                                    logger.debug('Completely removed')
                                     self.emotes.remove(emote)
 
 
