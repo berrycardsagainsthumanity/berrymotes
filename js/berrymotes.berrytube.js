@@ -28,12 +28,12 @@ Bem.berrySiteInit = function () {
         if (document.body.style.webkitFilter !== undefined) {
             invertScript = document.createElement('script');
             invertScript.type = 'text/javascript';
-            invertScript.src = 'http://backstage.berrytube.tv/marminator/berrymotes.webkit.invert.js';
+            invertScript.src = 'http://berrymotes.com/assets/berrymotes.webkit.invert.js';
             document.body.appendChild(invertScript);
         } else {
             invertScript = document.createElement('script');
             invertScript.type = 'text/javascript';
-            invertScript.src = 'http://backstage.berrytube.tv/marminator/berrymotes.invertfilter.js';
+            invertScript.src = 'http://berrymotes.com/assets/berrymotes.invertfilter.js';
             document.body.appendChild(invertScript);
         }
         Bem.monkeyPatchChat();
@@ -101,9 +101,9 @@ $.fn.bindFirst = function (name, fn) {
 
 function marmReactiveMode() {
     if (Bem.debug)
-        $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.staging.css" />');
+        $("head").append('<link rel="stylesheet" type="text/css" href="http://berrymotes.com/assets/reactive.staging.css" />');
     else
-        $("head").append('<link rel="stylesheet" type="text/css" href="http://backstage.berrytube.tv/marminator/reactive.css" />');
+        $("head").append('<link rel="stylesheet" type="text/css" href="http://berrymotes.com/assets/reactive.css" />');
 
     var pollpane = $('#pollpane');
     $('#pollControl').appendTo(pollpane);
@@ -362,7 +362,7 @@ Bem.settings.get('apngSupported', function (apngSupported) {
                     // If we don't have apng support we're gonna load up the canvas hack. No reason to load if apng support exists.
                     var script = document.createElement('script');
                     script.type = 'text/javascript';
-                    script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
+                    script.src = 'http://berrymotes.com/assets/apng-canvas.min.js';
                     document.body.appendChild(script);
                 }
             };
@@ -376,7 +376,7 @@ Bem.settings.get('apngSupported', function (apngSupported) {
         Bem.apngSupported = false;
         var script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'http://backstage.berrytube.tv/marminator/apng-canvas.min.js';
+        script.src = 'http://berrymotes.com/assets/apng-canvas.min.js';
         document.body.appendChild(script);
     } else {
         Bem.apngSupported = true;
@@ -385,5 +385,5 @@ Bem.settings.get('apngSupported', function (apngSupported) {
 
 var script = document.createElement('script');
 script.type = 'text/javascript';
-script.src = 'http://backstage.berrytube.tv/marminator/berrymotes.core.js';
+script.src = 'http://berrymotes.com/assets/berrymotes.core.js';
 document.body.appendChild(script);
