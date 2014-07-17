@@ -12,7 +12,8 @@
 
 from .scraper import BMScraper
 from .emote_processors import (BasicEmotesProcessorFactory,
-                               UserscriptEmotesProcessorFactory)
+                               UserscriptEmotesProcessorFactory,
+                               AndroidEmotesProcessorFactory)
 
 import logging
 

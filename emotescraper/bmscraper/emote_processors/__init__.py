@@ -12,3 +12,4 @@
 
 from .basic_emotes_processor import BasicEmotesProcessorFactory
 from .userscript_emotes_processor import UserscriptEmotesProcessorFactory
+from .android_emotes_processor import AndroidEmotesProcessorFactory
