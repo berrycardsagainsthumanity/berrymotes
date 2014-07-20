@@ -44,9 +44,11 @@ for subreddit in subreddits:
         os.makedirs(os.path.dirname(emotes_file))
         
     emotes_data = dumps(subreddit_emotes, separators=(',', ': '));
-    f = gzip.open(emotes_file, 'r')
-    emotes_data_old = f.read()
-    f.close()
+    emotes_data_old = ''
+    if (os.path.exists(emotes_file)):
+        f = gzip.open(emotes_file, 'r')
+        emotes_data_old = f.read()
+        f.close()
     
     if emotes_data != emotes_data_old:
         f = gzip.open(emotes_file, 'wb')    
