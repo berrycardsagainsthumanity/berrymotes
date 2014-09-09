@@ -475,7 +475,8 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             }
             $emote.css('background-position', position_string);
             if ($emote.is('.canvasapng') == false) {
-                $emote.css('background-image', ['url(', emote['background-image'], ')'].join(''));
+                var bgImage = emote['apng_url'] || emote['background-image'];
+                $emote.css('background-image', ['url(', bgImage, ')'].join(''));
             }
             var flags = $emote.attr('flags');
             if (flags) flags = flags.replace('-refresh', '');
