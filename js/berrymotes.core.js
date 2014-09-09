@@ -239,6 +239,10 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             if (emote.names.indexOf($.trim(Bem.blacklist[j])) > -1) {
                 eligible = false;
             }
+            // allow subreddit blacklisting
+            if ('/r/'+emote.sr == $.trim(Bem.blacklist[j])) {
+                eligible = false;
+            }
         }
         if (Bem.showNsfwEmotes === false && emote.nsfw) eligible = false;
         if (emote.com && Bem.community != emote.com) eligible = false;
