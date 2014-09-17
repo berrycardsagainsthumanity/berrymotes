@@ -105,6 +105,8 @@ function marmReactiveMode() {
     else
         $("head").append('<link rel="stylesheet" type="text/css" href="http://berrymotes.com/assets/reactive.css" />');
 
+    $('.wrapper').first().hide();
+
     var pollpane = $('#pollpane');
     $('#pollControl').appendTo(pollpane);
     var pollClose = $('<div class="close"></div>');
