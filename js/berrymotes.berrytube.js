@@ -52,6 +52,11 @@ Bem.berrySiteInit = function () {
             Bem.loggingIn = true;
         });
 
+        if (!Bem.enabled){
+            // do not emote existing chat messages if emotes are disabled
+            return null;
+        }
+
         function handleText(node) {
             Bem.applyEmotesToTextNode(node);
         }

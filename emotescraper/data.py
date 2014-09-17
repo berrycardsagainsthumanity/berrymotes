@@ -310,4 +310,5 @@ emote_info = [
     {'name': 'toxinclop', 'nsfw': True},
     {'name': 'dickchaser', 'nsfw': True},
     {'name': 'chaserdance', 'nsfw': True},
+    {'name': 'dustypugfuckdoodle', 'nsfw': True}
 ]
