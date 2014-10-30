@@ -42,6 +42,7 @@ subreddits = [
     "applefritter",
     "applejack",
     "arborus",
+    "asmatteringofemotes",
     "babsquisition",
     "batquisition",
     "beautybrass",
@@ -56,6 +57,7 @@ subreddits = [
     "BTLoungeLoungeLounge",
     "BTdoesntevenknow",
     "btmodminmotes",
+    "BTMoonlit",
     "cadance",
     "chakolateemotes",
     "cheesesandwichmlp",
@@ -93,6 +95,7 @@ subreddits = [
     "lyraquisition",
     "malsententia",
     "maudpie",
+    "meatemotes",
     "minuette",
     "mlas1animotes",
     "mlas1emotes",
@@ -156,6 +159,7 @@ subreddits = [
     "mylittlescreamotes",
     "mylittleserver",
     "mylittlesh",
+    "mylittlesketchheart",
     "MyLittleSlamJam",
     "mylittlesports",
     "mylittlesquidward",
@@ -312,5 +316,6 @@ emote_info = [
     {'name': 'toxinclop', 'nsfw': True},
     {'name': 'dickchaser', 'nsfw': True},
     {'name': 'chaserdance', 'nsfw': True},
-    {'name': 'dustypugfuckdoodle', 'nsfw': True}
+    {'name': 'dustypugfuckdoodle', 'nsfw': True},
+    {'name': 'rdfuriousclopping', 'nsfw': True}
 ]
