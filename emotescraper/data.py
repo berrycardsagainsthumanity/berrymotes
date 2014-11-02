@@ -221,6 +221,9 @@ subreddits = [
     "vinylscratch",
     "yaxim3",
     "zponymotes",
+    "adagiodazzle",
+    "ariablaze",
+    "sonatadusk",
 ]
 
 emote_info = [
