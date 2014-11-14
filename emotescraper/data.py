@@ -322,5 +322,6 @@ emote_info = [
     {'name': 'chaserdance', 'nsfw': True},
     {'name': 'dustypugfuckdoodle', 'nsfw': True},
     {'name': 'rdfuriousclopping', 'nsfw': True},
-    {'name': 'moonlitguard', 'nsfw': True}
+    {'name': 'moonlitguard', 'nsfw': True},
+    {'name': 'octaviaprotection', 'nsfw': True}
 ]
