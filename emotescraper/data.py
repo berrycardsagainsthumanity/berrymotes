@@ -1,9 +1,11 @@
 nsfw_subreddits = [
+    # Subreddits which when scraped will automatically have any emotes tagged as nsfw.
     "mylittlensfw",
     "clopmotes"
 ]
 
 image_blacklist = [
+    # Prevent any of the stylesheets from ever being emoted.
     "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
     "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
     "http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
@@ -13,13 +15,14 @@ image_blacklist = [
 ]
 
 image_blacklist_android = image_blacklist + [
-    #andrid ignore, mostly becaouse they are too large
+    # Android ignore; mostly because they are too large.
     "http://d.thumbs.redditmedia.com/6vnl2z58K-37e-du.png",
     "http://e.thumbs.redditmedia.com/m48Mt-C5OajCRvXp.png",
     "http://d.thumbs.redditmedia.com/jbMarIOi-_cCQIRW.png",
 ]
 
 subreddits = [
+    # Subreddits to scrape for emotes
     "marmemotes",
     "marmemotes2",
     "mlpaprilfools2014",
@@ -228,6 +231,7 @@ subreddits = [
 ]
 
 emote_info = [
+    # Add meta data to emotes; usually used to tag emotes as nsfw. Please add only one alias of an emote.
     {'name': 'thesafewordistoast', 'com': 'bt'},
     {'name': 'toastdeib', 'com': 'bt'},
     {'name': 'gtoastdeib', 'com': 'bt'},
