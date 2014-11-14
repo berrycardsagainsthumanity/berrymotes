@@ -58,6 +58,7 @@ subreddits = [
     "BTdoesntevenknow",
     "btmodminmotes",
     "BTMoonlit",
+    "BTpatron",
     "cadance",
     "chakolateemotes",
     "cheesesandwichmlp",
@@ -320,5 +321,6 @@ emote_info = [
     {'name': 'dickchaser', 'nsfw': True},
     {'name': 'chaserdance', 'nsfw': True},
     {'name': 'dustypugfuckdoodle', 'nsfw': True},
-    {'name': 'rdfuriousclopping', 'nsfw': True}
+    {'name': 'rdfuriousclopping', 'nsfw': True},
+    {'name': 'moonlitguard', 'nsfw': True}
 ]
