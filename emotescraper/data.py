@@ -1,9 +1,11 @@
 nsfw_subreddits = [
+    #subbredits which when scrapped will automatically have any emotes tagged as nsfw.
     "mylittlensfw",
     "clopmotes"
 ]
 
 image_blacklist = [
+    #prvent any of the stylesheets from ever being emoted.
     "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
     "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
     "http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
@@ -20,6 +22,7 @@ image_blacklist_android = image_blacklist + [
 ]
 
 subreddits = [
+    #subreddits to scrape for emotes
     "marmemotes",
     "marmemotes2",
     "mlpaprilfools2014",
@@ -227,6 +230,7 @@ subreddits = [
 ]
 
 emote_info = [
+    #add meta data to emotes, usually used to tag emotes as nsfw. Please add only one alias of an emote.
     {'name': 'thesafewordistoast', 'com': 'bt'},
     {'name': 'toastdeib', 'com': 'bt'},
     {'name': 'gtoastdeib', 'com': 'bt'},
@@ -321,5 +325,6 @@ emote_info = [
     {'name': 'chaserdance', 'nsfw': True},
     {'name': 'dustypugfuckdoodle', 'nsfw': True},
     {'name': 'rdfuriousclopping', 'nsfw': True},
-    {'name': 'octaviaprotection', 'nsfw': True}
+    {'name': 'octaviaprotection', 'nsfw': True},
+    {'name': 'moonlitguard', 'nsfw': True}
 ]
