@@ -17,6 +17,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         { key: 'effects', type: "bool", default: true },
         { key: 'showNsfwEmotes', type: "bool", default: false },
         { key: 'onlyHover', type: "bool", default: false },
+        { key: 'onlyHoverNSFW', type: "bool", default: false },
         { key: 'maxEmoteHeight', type: "int", default: 200 },
         { key: 'debug', type: "bool", default: false },
         { key: 'enableSlide', type: "bool", default: true },
@@ -216,7 +217,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
         var emoteHtml = ['<span class="berryemote',
             emote.height > Bem.maxEmoteHeight ? ' resize' : '',
             Bem.apngSupported == false && emote.apng_url ? ' canvasapng' : '',
-            Bem.onlyHover == true ? ' berryemote_hover' : '',
+            Bem.onlyHover == true || ( emote.nsfw && Bem.onlyHoverNSFW ) ? ' berryemote_hover' : '',
             '" ',
             'style="',
             'height:', emote.height, 'px; ',
@@ -313,7 +314,7 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             innerWrap.css('left', '0');
         });
 
-        if (Bem.onlyHover && !isSearch) {
+        if ((Bem.onlyHover || Bem.onlyHoverNSFW) && !isSearch) {
             var emotesToHover = message.find('.berryemote_hover');
             $.each(emotesToHover, function (index, emoteDom) {
                 var $emote = $(emoteDom);
@@ -911,6 +912,17 @@ Bem = typeof Bem === "undefined" ? {} : Bem;
             var enabled = $(this).is(":checked");
             Bem.showNsfwEmotes = enabled;
             Bem.settings.set('showNsfwEmotes', enabled);
+            nsfwHover.prop("disabled", !enabled)
+        });
+        //----------------------------------------
+        $(rowSpanStr).text(" only on hover: ").appendTo(row);
+        var nsfwHover = $('<input/>').attr('type', 'checkbox').appendTo(row);
+        nsfwHover.prop('disabled', !Bem.showNsfwEmotes);
+        if (Bem.onlyHoverNSFW) nsfwHover.attr('checked', 'checked');
+        nsfwHover.change(function () {
+            var enabled = $(this).is(":checked");
+            Bem.onlyHoverNSFW = enabled;
+            Bem.settings.set('onlyHoverNSFW', enabled);
         });
         //----------------------------------------
         row = $(rowDivStr).appendTo(configOps);
