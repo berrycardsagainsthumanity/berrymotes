@@ -71,6 +71,9 @@ class BMScraper(FileNameUtils):
         logger.debug("Fetching css using {} threads".format(self.workers))
         workpool = WorkerPool(size=self.workers)
 
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+
         for subreddit in self.subreddits:
             workpool.put(DownloadJob(self._requests,
                                      'http://www.reddit.com/r/{}/stylesheet'.format(subreddit),
@@ -183,15 +186,32 @@ class BMScraper(FileNameUtils):
         return emotes_staging
 
     def _callback_fetch_stylesheet(self, response, subreddit=None):
+        if not subreddit:
+            logger.error("Subreddit not set")
+            return
+
+        css = ''
+
+        css_path = os.path.sep.join([self.cache_dir, subreddit + '.css'])
+        if os.path.exists(css_path):
+            with open(css_path) as css_file:
+                css = css_file.read()
+
         if not response:
             logger.error("Failed to fetch css for {}".format(subreddit))
-            return
 
         if response.status_code != 200:
             logger.error("Failed to fetch css for {} (Status {})".format(subreddit, response.status_code))
+        else:
+            css = response.text
+            with open(css_path, 'w') as css_file:
+                css_file.write(css)
+
+        if css == '':
+            logger.error("No css for {} found".format(subreddit))
             return
 
-        emotes_staging = self._parse_css(response.text)
+        emotes_staging = self._parse_css(css)
         if not emotes_staging:
             return
 
@@ -248,10 +268,20 @@ class BMScraper(FileNameUtils):
 
     def _callback_download_image(self, response, image_path=None):
         if not image_path:
+            logger.error("image_path not set")
+            return
+
+        if not response:
+            logger.error("Failed to fetch image {}".format(image_path))
+            return
+
+        if response.status_code != 200:
+            logger.error("Failed to fetch image {} (Status {})".format(image_path, response.status_code))
             return
 
         data = response.content
-        if not data:
+        if not data or len(data) == 0:
+            logger.error("Failed to fetch image {}, data is empty".format(image_path))
             return
 
         image_dir = os.path.dirname(image_path)
@@ -261,6 +291,5 @@ class BMScraper(FileNameUtils):
             except OSError:
                 pass
 
-        f = open(image_path, 'wb')
-        f.write(data)
-        f.close()
+        with open(image_path, 'wb') as f:
+            f.write(data)
