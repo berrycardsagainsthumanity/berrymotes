@@ -195,7 +195,7 @@ class BMScraper(FileNameUtils):
         css_path = os.path.sep.join([self.cache_dir, subreddit + '.css'])
         if os.path.exists(css_path):
             with open(css_path) as css_file:
-                css = css_file.read()
+                css = css_file.read().decode('utf8')
 
         if not response:
             logger.error("Failed to fetch css for {}".format(subreddit))
@@ -205,7 +205,7 @@ class BMScraper(FileNameUtils):
         else:
             css = response.text
             with open(css_path, 'w') as css_file:
-                css_file.write(css)
+                css_file.write(css.encode('utf8'))
 
         if css == '':
             logger.error("No css for {} found".format(subreddit))
