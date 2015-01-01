@@ -12,7 +12,8 @@ image_blacklist = [
     "http://c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png",
     "http://e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
     "http://b.thumbs.redditmedia.com/9KPIZR5eNlWAev7m.png",
-    "http://e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png"
+    "http://e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
+    "http://b.thumbs.redditmedia.com/tfT-mewdfRyX0d1jQUuBB_c_gh68UE0IHyE7Gti6kBE.png"
 ]
 
 image_blacklist_android = image_blacklist + [
