@@ -6,20 +6,21 @@ nsfw_subreddits = [
 
 image_blacklist = [
     # Prevent any of the stylesheets from ever being emoted.
-    "http://a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
-    "http://f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
-    "http://b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
-    "http://c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png",
-    "http://e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
-    "http://b.thumbs.redditmedia.com/9KPIZR5eNlWAev7m.png",
-    "http://e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png"
+    "a.thumbs.redditmedia.com/4BIUyA0SW1OkC5ON.png",
+    "f.thumbs.redditmedia.com/0Fr3gH0gBwtd9okw.png",
+    "b.thumbs.redditmedia.com/GUrfNHIaMEoN29eC.jpg",
+    "c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png",
+    "e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
+    "b.thumbs.redditmedia.com/9KPIZR5eNlWAev7m.png",
+    "e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
+    "b.thumbs.redditmedia.com/tfT-mewdfRyX0d1jQUuBB_c_gh68UE0IHyE7Gti6kBE.png"
 ]
 
 image_blacklist_android = image_blacklist + [
     # Android ignore; mostly because they are too large.
-    "http://d.thumbs.redditmedia.com/6vnl2z58K-37e-du.png",
-    "http://e.thumbs.redditmedia.com/m48Mt-C5OajCRvXp.png",
-    "http://d.thumbs.redditmedia.com/jbMarIOi-_cCQIRW.png",
+    "d.thumbs.redditmedia.com/6vnl2z58K-37e-du.png",
+    "e.thumbs.redditmedia.com/m48Mt-C5OajCRvXp.png",
+    "d.thumbs.redditmedia.com/jbMarIOi-_cCQIRW.png",
 ]
 
 subreddits = [
