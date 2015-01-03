@@ -249,11 +249,10 @@ class BMScraper(FileNameUtils):
             emote['sr'] = subreddit
 
             # Sometimes people make css errors, fix those.
-            if ('background-image' not in emote
-                and 'background' in emote
-                and emote['background'].startswith('http')):
-                emote['background-image'] = emote['background']
-                del emote['background']
+            if 'background-image' not in emote and 'background' in emote:
+                if re.match(r'^(https?:)?//', emote['background']):
+                    emote['background-image'] = emote['background']
+                    del emote['background']
 
             # need at least an image for a ponymote. Some trash was getting in.
             # 1500 pixels should be enough for anyone!
