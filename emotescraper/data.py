@@ -31,6 +31,7 @@ subreddits = [
     "btcanimotes",
     "jericksvector",
     "mylittlepony",
+    "yakoshimotes",
     "mylittlevagrant",
     "abunchofemotes",
     "abunchmoreemotes",
