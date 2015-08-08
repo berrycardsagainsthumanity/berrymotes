@@ -1,7 +1,8 @@
 nsfw_subreddits = [
     # Subreddits which when scraped will automatically have any emotes tagged as nsfw.
     "mylittlensfw",
-    "clopmotes"
+    "clopmotes",
+    "BTMoonlitNSFW"
 ]
 
 image_blacklist = [
@@ -12,7 +13,9 @@ image_blacklist = [
     "c.thumbs.redditmedia.com/5N6wrRpkfXoAv5lP.png",
     "e.thumbs.redditmedia.com/5ndsCluVaPSIsPOR.png",
     "b.thumbs.redditmedia.com/9KPIZR5eNlWAev7m.png",
-    "b.thumbs.redditmedia.com/tfT-mewdfRyX0d1jQUuBB_c_gh68UE0IHyE7Gti6kBE.png"
+    "b.thumbs.redditmedia.com/tfT-mewdfRyX0d1jQUuBB_c_gh68UE0IHyE7Gti6kBE.png",
+    "b.thumbs.redditmedia.com/kf2kLPkoDns8fsQMJK_lwyJ7x1YdccE8qnapjdjx_dA.png",
+    "b.thumbs.redditmedia.com/65odf8-ndU5UYmBhnFEqioTDHCXVrYnwBJS5wXoitqU.png"
 ]
 
 image_blacklist_android = image_blacklist + [
@@ -62,6 +65,7 @@ subreddits = [
     "BTdoesntevenknow",
     "btmodminmotes",
     "BTMoonlit",
+    "BTMoonlitNSFW",
     "BTpatron",
     "cadance",
     "chakolateemotes",
@@ -88,6 +92,7 @@ subreddits = [
     "futemotes",
     "gallopfrey",
     "greenganache",
+    "greenganache2",
     "himntor",
     "hugemotes",
     "idliketobeatree",
@@ -95,10 +100,13 @@ subreddits = [
     "isthisananimoteyet",
     "isthisanemoteyet",
     "jacksanimotes",
+    "kalymotes",
     "littlecolt",
     "littlemissbloomotes",
+    "lunanet",
     "lyra",
     "lyraquisition",
+    "Malsentententia",
     "malsententia",
     "maudpie",
     "meatemotes",
@@ -123,6 +131,7 @@ subreddits = [
     "mylittlecelestias",
     "mylittlechaos",
     "mylittlecirclejerk",
+    "mylittlecolt",
     "mylittlecombiners",
     "mylittleconspiracy",
     "mylittledamon",
@@ -144,6 +153,7 @@ subreddits = [
     "mylittlekindle",
     "mylittlekitchen",
     "mylittlekurtis",
+    "mylittlekurtis1",
     "mylittleleague",
     "mylittlelistentothis",
     "mylittlelivestream",
@@ -199,6 +209,7 @@ subreddits = [
     "sexyconfederatereddit",
     "shadeschatlounge",
     "shittyemotes",
+    "snakemote",
     "spaceclop",
     "spanishmeerkat",
     "speedingturtle",
@@ -208,6 +219,7 @@ subreddits = [
     "surprise",
     "sweetie_belle",
     "tacoshy",
+    "takedaemotes",
     "taviquisition",
     "tbpimagedump",
     "tbpimagedump2",
@@ -218,12 +230,14 @@ subreddits = [
     "trixquisition",
     "themirishponies",
     "tiltemotes",
+    "TSpudsWrestlingEmotes",
     "twidashmotes",
     "twilightsparkle",
     "twiquisition",
     "vinylscratch",
     "wutintoemotes",
     "yakoshimotes",
+    "yakoshiermotes",
     "zponymotes",
     "adagiodazzle",
     "ariablaze",
@@ -327,5 +341,15 @@ emote_info = [
     {'name': 'dustypugfuckdoodle', 'nsfw': True},
     {'name': 'rdfuriousclopping', 'nsfw': True},
     {'name': 'moonlitguard', 'nsfw': True},
-    {'name': 'octaviaprotection', 'nsfw': True}
+    {'name': 'octaviaprotection', 'nsfw': True},
+    {'name': 'twistslut', 'nsfw': True},
+    {'name': 'twistbj', 'nsfw': True},
+    {'name': 'lmrsis', 'nsfw': True},
+    {'name': 'chestfire', 'nsfw': True},
+    {'name': 'Shirtaloo', 'nsfw': True},
+    {'name': 'brutalewd', 'nsfw': True},
+    {'name': 'twistboobs', 'nsfw': True},
+    {'name': 'pikabuttslap', 'nsfw': True},
+    {'name': 'bonbondragondildo', 'nsfw': True},
+    {'name': 'neko', 'nsfw': True},
 ]
